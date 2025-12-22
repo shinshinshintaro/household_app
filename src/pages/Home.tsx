@@ -114,10 +114,7 @@ export const Home = () => {
             targetSavings={target}
           />
 
-          <TargetSavingsCard
-            target={target}
-            onSave={saveTargetFromInput}
-          />
+          <TargetSavingsCard initialValue={target} onSave={saveTargetFromInput} />
         </div>
 
         {/* ✅ 中央：main */}

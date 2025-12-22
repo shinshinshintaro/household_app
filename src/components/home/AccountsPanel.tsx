@@ -74,7 +74,8 @@ export const AccountsPanel = ({
       {visibleAccounts.length === 0 ? (
         <p className="subText">データがありません</p>
       ) : (
-        <ul className="list">
+        <div className='accountsListWrap'>
+          <ul className="list">
           {visibleAccounts.map((a, index) => (
             <li key={getRowKey(a, index)} className="row rowGrid">
               {/* 種別 */}
@@ -112,6 +113,7 @@ export const AccountsPanel = ({
             </li>
           ))}
         </ul>
+        </div>
       )}
     </div>
   )

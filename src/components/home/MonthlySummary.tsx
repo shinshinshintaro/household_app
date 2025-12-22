@@ -65,11 +65,11 @@ export const MonthlySummaryCard = ({
         </span>
         <br />
         <span className="summaryItem summaryBlue">
-          目標貯金：<b>{yen(targetSavings)}</b>
+          今月の目標貯金：<b>{yen(targetSavings)}</b>
         </span>
         <br />
         <span className={`summaryItem ${diffClass}`}>
-          差額：<b>{yen(diff)}</b>
+          差額（収支と今月の目標貯金の差）：<b>{yen(diff)}</b>
         </span>
       </div>
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 /**
  * 目標貯金額は「0以上の整数（円）」のみ
  * - 指数表記(e/E)・小数・マイナス・カンマ入りは拒否
- * - 桁数制限（最大15桁） + MAX_SAFE_INTEGER 超えは拒否
+ * - 桁数制限（最大12桁） + MAX_SAFE_INTEGER 超えは拒否
  */
 const toSafeYen = (input: string): number | null => {
   const s = input.trim()
@@ -12,8 +12,8 @@ const toSafeYen = (input: string): number | null => {
   if (s.length === 0) return null
 
   // 数字のみ（指数表記や小数、カンマ等は全部落とす）
-  // 15桁はだいたい「兆〜京」手前くらいまで。必要なら増減OK
-  if (!/^\d{1,15}$/.test(s)) return null
+  // 12桁はだいたい「兆〜京」手前くらいまで。必要なら増減OK
+  if (!/^\d{1,12}$/.test(s)) return null
 
   const n = Number(s)
   if (!Number.isFinite(n)) return null
@@ -48,7 +48,7 @@ export const useTargetSavings = (storageKey: string) => {
   const saveTargetFromInput = (input: string) => {
     const n = toSafeYen(input)
     if (n === null) {
-      alert('目標貯金額は 0以上の整数（数字のみ・最大15桁）で入力してください（例: 300000）')
+      alert('目標貯金額は 0以上の整数（数字のみ・最大12桁）で入力してください（例: 300000）')
       return false
     }
     setTarget(n)

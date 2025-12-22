@@ -16,10 +16,10 @@ export const TargetSavingsCard = ({ initialValue, onSave }: Props) => {
 
   return (
     <div className="card">
-      <h2>目標貯金額</h2>
+      <h2>今月の目標貯金額</h2>
 
       <div className="subText" style={{ marginBottom: 8 }}>
-        目標貯金額（円）
+        今月の目標貯金額（円）
       </div>
 
       <input
