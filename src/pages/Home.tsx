@@ -4,11 +4,9 @@ import { useAccounts } from '../hooks/useAccounts'
 import { useFilters } from '../hooks/useFilters'
 import { useTargetSavings } from '../hooks/useTargetSavings'
 import * as S from '../selectors/accountSelectors'
-
 import { EntryForm } from '../components/home/EntryForm'
 import { AccountsPanel } from '../components/home/AccountsPanel'
 import { PiePanel } from '../components/PiePanel'
-
 import { MonthlySummaryCard } from '../components/home/MonthlySummary'
 import { TargetSavingsCard } from '../components/TargetSavingsCard'
 
@@ -49,8 +47,6 @@ export const Home = () => {
   const accountsByMode = useMemo(() => S.selectAccountsByMode(accountsByPeriod, viewMode), [accountsByPeriod, viewMode])
   const visibleAccounts = useMemo(() => S.selectVisibleAccounts(accountsByMode, sortKey), [accountsByMode, sortKey])
 
-  const totals = useMemo(() => S.selectTotals(accountsByPeriod), [accountsByPeriod])
-
   const expensePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'EXPENSE'), [accountsByPeriod])
   const expenseTotal = useMemo(() => S.selectTotalFromPie(expensePieData), [expensePieData])
   const incomePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'INCOME'), [accountsByPeriod])
@@ -64,7 +60,6 @@ export const Home = () => {
     [accounts, summaryMonthKey],
   )
   const summaryTotals = useMemo(() => S.selectTotals(accountsForSummaryMonth), [accountsForSummaryMonth])
-
   const monthly = useMemo(() => S.selectMonthlyBalances(accounts), [accounts])
 
   const onResetDraft = () => setDraft(prev => ({ ...prev, amount: '', memo: '' }))
@@ -101,7 +96,7 @@ export const Home = () => {
 
   return (
     <div className="container">
-      {/* ①：中央寄せ（CSS触らずに確実に効かせる） */}
+      {/* ①：確実に中央寄せ（CSSに依存しない） */}
       <h1 className="title" style={{ textAlign: 'center' }}>
         家計簿アプリ
       </h1>
@@ -122,7 +117,7 @@ export const Home = () => {
         </div>
 
         {/* 中央：入力＋一覧 */}
-        <div className="middle">
+        <div className="center">
           <EntryForm
             draft={draft}
             setDraft={setDraft}
@@ -144,6 +139,7 @@ export const Home = () => {
           <AccountsPanel
             modeLabel={modeLabel}
             periodLabel={periodLabel}
+            totals={{ income: 0, expense: 0, balance: 0 }} // ※ AccountsPanel側から summaryRow消したので実質未使用
             viewMode={viewMode}
             setViewMode={setViewMode}
             monthKey={monthKey}

@@ -4,6 +4,14 @@ export type SortKey = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 export type ViewMode = 'BALANCE' | 'INCOME' | 'EXPENSE'
 export type MonthKey = 'ALL' | string // 'YYYY-MM' or ALL
 
+// 月次サマリ用
+export type MonthlyBalancePoint = {
+  monthKey: string
+  income: number
+  expense: number
+  balance: number
+}
+
 // YYYY-MM -> 2025年12月
 export const formatMonthJP = (m: string) => {
   if (!/^\d{4}-\d{2}$/.test(m)) return m
@@ -32,6 +40,19 @@ export const selectMonthOptions = (accounts: Account[], draftDate: string) => {
     }
   }
   return Array.from(set).sort((a, b) => (a < b ? 1 : -1))
+}
+
+export const selectLatestMonthKey = (accounts: Account[], draftDate: string) => {
+  const months = new Set<string>()
+  months.add(draftDate.slice(0, 7))
+  for (const a of accounts) {
+    if (typeof (a as any)?.date === 'string' && (a as any).date.length >= 7) {
+      months.add((a as any).date.slice(0, 7))
+    }
+  }
+  const arr = Array.from(months)
+  arr.sort((a, b) => (a < b ? 1 : -1)) // desc
+  return arr[0] ?? draftDate.slice(0, 7)
 }
 
 export const selectAccountsByPeriod = (accounts: Account[], monthKey: MonthKey) => {
@@ -79,36 +100,20 @@ export const selectTotalFromPie = (pieData: { name: string; value: number }[]) =
   return pieData.reduce((sum, d) => sum + d.value, 0)
 }
 
-/** ★追加：存在する最新の月(YYYY-MM)を返す */
-export const selectLatestMonthKey = (accounts: Account[], fallbackDate: string): string => {
-  const months = new Set<string>()
-  months.add(fallbackDate.slice(0, 7))
-  for (const a of accounts) {
-    if (typeof a.date === 'string' && a.date.length >= 7) months.add(a.date.slice(0, 7))
-  }
-  return Array.from(months).sort((a, b) => (a < b ? 1 : -1))[0]
-}
-
-/** ★追加：月ごとの「収入/支出/収支」を返す（折れ線用） */
-export type MonthlyBalancePoint = {
-  monthKey: string // YYYY-MM
-  income: number
-  expense: number
-  balance: number
-}
-
+// 月ごとの収支（折れ線用）
 export const selectMonthlyBalances = (accounts: Account[]): MonthlyBalancePoint[] => {
   const map = new Map<string, { income: number; expense: number }>()
   for (const a of accounts) {
-    const mk = a.date.slice(0, 7)
-    const cur = map.get(mk) ?? { income: 0, expense: 0 }
+    const monthKey = a.date.slice(0, 7)
+    const cur = map.get(monthKey) ?? { income: 0, expense: 0 }
     if (a.type === 'INCOME') cur.income += a.amount
     if (a.type === 'EXPENSE') cur.expense += a.amount
-    map.set(mk, cur)
+    map.set(monthKey, cur)
   }
 
+  // 古い→新しい（折れ線はこの方が自然）
   return Array.from(map.entries())
-    .sort((a, b) => (a[0] < b[0] ? -1 : 1)) // 古い→新しい（折れ線は左から時系列が見やすい）
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
     .map(([monthKey, v]) => ({
       monthKey,
       income: v.income,
