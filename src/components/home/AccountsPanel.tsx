@@ -43,7 +43,7 @@ export const AccountsPanel = ({
           <h2>
             家計簿一覧（{modeLabel} / {periodLabel}）
           </h2>
-          {/* summaryRow は月次サマリへ移動済み */}
+          
         </div>
 
         <div className="controls">
@@ -77,25 +77,31 @@ export const AccountsPanel = ({
         <ul className="list">
           {visibleAccounts.map((a, index) => (
             <li key={getRowKey(a, index)} className="row rowGrid">
-              <div className="rowType">
+              {/* 種別 */}
+              <div className="colType">
                 <span className={`badge ${a.type === 'EXPENSE' ? 'badgeExpense' : 'badgeIncome'}`}>
                   {a.type === 'EXPENSE' ? '支出' : '収入'}
                 </span>
               </div>
 
-              <div className="rowDate subText">{a.date}</div>
+              {/* 日付 */}
+              <div className="colDate">{a.date}</div>
 
-              <div className="rowCategory">
-                <b>{a.category}</b>
+              {/* カテゴリ */}
+              <div className="colCategory">
+                <span className="rowCategory">{a.category}</span>
               </div>
 
-              <div className="rowMemo subText" title={a.memo ?? ''}>
-                {a.memo ? a.memo : ''}
+              {/* 備考（カテゴリ右・金額左） */}
+              <div className="colMemo" title={a.memo ?? ''}>
+                {a.memo ? `メモ: ${a.memo}` : ''}
               </div>
 
-              <div className="rowAmount amount">¥{a.amount.toLocaleString()}</div>
+              {/* 金額 */}
+              <div className="colAmount">¥{a.amount.toLocaleString()}</div>
 
-              <div className="rowActions">
+              {/* アクション */}
+              <div className="colActions">
                 <button className="miniBtn" onClick={() => onEdit(a)}>
                   編集
                 </button>

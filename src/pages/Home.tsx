@@ -136,10 +136,6 @@ export const Home = () => {
             incomeCategories={INCOME_CATEGORIES}
           />
 
-          <div className="subText">
-            対象月：<b>{S.formatMonthJP(draft.date.slice(0, 7))}</b>（日付から自動）
-          </div>
-
           <AccountsPanel
             modeLabel={modeLabel}
             periodLabel={periodLabel}
