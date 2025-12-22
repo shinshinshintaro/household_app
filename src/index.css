@@ -1,0 +1,363 @@
+/* =========================
+   Base
+========================= */
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f6f7fb;
+  color: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =========================
+   Container / Title
+========================= */
+.container {
+  width: 100%;
+  padding: 28px 24px 40px;
+}
+
+.title {
+  text-align: center;
+  margin: 10px 0 18px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* =========================
+   Layout (PC)
+========================= */
+.layout {
+  display: grid;
+  grid-template-columns:
+    1fr
+    minmax(640px, 760px)
+    1fr;
+  align-items: start;
+  column-gap: 0;
+}
+
+.left {
+  grid-column: 2;
+  width: 100%;
+}
+
+.right {
+  grid-column: 3;
+  justify-self: end;
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-left: 28px;
+}
+
+/* =========================
+   Responsive：狭いときは縦並び
+========================= */
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: 1fr;
+    row-gap: 18px;
+  }
+
+  .left {
+    grid-column: 1;
+    justify-self: center;
+    width: min(760px, 100%);
+  }
+
+  .right {
+    grid-column: 1;
+    justify-self: center;
+    width: min(760px, 100%);
+    padding-left: 0;
+  }
+}
+
+/* =========================
+   Card
+========================= */
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+  margin-top: 14px;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.right .card h2 {
+  text-align: center;
+}
+
+/* 入力カードの上部（編集バッジ用） */
+.cardHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.editBadge{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #93c5fd;
+  background:#eff6ff;
+  font-weight:800;
+}
+
+/* =========================
+   Form
+========================= */
+.formRow {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  align-items: end;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+@media (max-width: 700px) {
+  .formRow {
+    flex-wrap: wrap;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 110px;
+}
+
+.field label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.input {
+  height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+}
+
+.inputShort {
+  width: 120px;
+}
+
+.inputMemo {
+  width: 180px;
+}
+
+.button {
+  height: 34px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.button:hover {
+  filter: brightness(0.95);
+}
+
+.buttonGhost{
+  background:#eef2ff;
+  color:#1f2937;
+  border:1px solid #dbeafe;
+}
+
+.subText {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* =========================
+   List header controls
+========================= */
+.listHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.listHeaderLeft{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.controlSelect {
+  height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+}
+
+.controlSelect:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+}
+
+@media (max-width: 700px) {
+  .listHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls {
+    width: 100%;
+  }
+
+  .controlSelect {
+    width: 100%;
+  }
+}
+
+/* ✅ 合計表示 */
+.summaryRow{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  font-size:12px;
+  color:#6b7280;
+}
+.summaryItem b{
+  color:#111827;
+  font-weight:900;
+}
+
+/* =========================
+   List
+========================= */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 110px 1fr 180px;
+  gap: 12px;
+  padding: 12px 10px;
+  border-top: 1px solid #eef2f7;
+  align-items: center;
+}
+
+.row:first-child {
+  border-top: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  width: fit-content;
+}
+
+.badgeExpense {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.badgeIncome {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.amount {
+  text-align: right;
+  font-weight: 900;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.rowRight{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:8px;
+}
+
+.rowActions{
+  display:flex;
+  gap:8px;
+}
+
+.miniBtn{
+  height:30px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  background:#ffffff;
+  cursor:pointer;
+  font-weight:700;
+  font-size:12px;
+}
+
+.miniBtn:hover{
+  background:#f3f4f6;
+}
+
+.miniBtnDanger{
+  border-color:#fecaca;
+  color:#b91c1c;
+  background:#fff;
+}
+
+.miniBtnDanger:hover{
+  background:#fef2f2;
+}
+
+/* =========================
+   Pie chart wrapper
+========================= */
+.pieWrap {
+  display: grid;
+  place-items: center;
+  padding-top: 8px;
+}
