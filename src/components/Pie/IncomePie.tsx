@@ -17,10 +17,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 export const IncomePie = ({ data, total }: Props) => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
-  // 選択中カテゴリのデータ（円グラフは絞らない）
-  const activeItem = useMemo(() => {
+  const activeValue = useMemo(() => {
     if (!activeCategory) return null
-    return data.find(d => d.name === activeCategory) ?? null
+    const found = data.find(d => d.name === activeCategory)
+    return found ? found.value : null
   }, [data, activeCategory])
 
   if (data.length === 0) {
@@ -28,16 +28,10 @@ export const IncomePie = ({ data, total }: Props) => {
   }
 
   return (
-    <div style={{ width: 320 }}>
-      {/* 上部：合計 or 選択中カテゴリの金額 */}
+    <div>
       <div className="pieHeader">
-        <div className="pieHeaderTitle">
-          {activeCategory ? `選択中：${activeCategory}` : '合計'}
-        </div>
-
-        <div className="pieHeaderValue">
-          ¥{(activeItem ? activeItem.value : total).toLocaleString()}
-        </div>
+        <div className="pieHeaderTitle">{activeCategory ? `選択中：${activeCategory}` : '合計'}</div>
+        <div className="pieHeaderValue">¥{(activeCategory ? (activeValue ?? 0) : total).toLocaleString()}</div>
 
         {activeCategory && (
           <button className="chip" onClick={() => setActiveCategory(null)}>
@@ -46,7 +40,6 @@ export const IncomePie = ({ data, total }: Props) => {
         )}
       </div>
 
-      {/* 円グラフ本体（常に全カテゴリ） */}
       <div style={{ width: 260, height: 260, margin: '0 auto' }}>
         <ResponsiveContainer>
           <PieChart>
@@ -55,21 +48,19 @@ export const IncomePie = ({ data, total }: Props) => {
               dataKey="value"
               nameKey="name"
               outerRadius={100}
-              onClick={(_, index) => {
-                const name = data[index]?.name
-                if (!name) return
-                setActiveCategory(prev => (prev === name ? null : name))
+              onClick={(_, idx) => {
+                const clicked = data[idx]
+                if (!clicked) return
+                setActiveCategory(prev => (prev === clicked.name ? null : clicked.name))
               }}
             >
               {data.map(entry => {
-                const isActive = activeCategory === entry.name
-                const isDimmed = activeCategory && !isActive
-
+                const isDim = activeCategory && entry.name !== activeCategory
                 return (
                   <Cell
                     key={entry.name}
                     fill={CATEGORY_COLORS[entry.name] ?? '#9ca3af'}
-                    opacity={isDimmed ? 0.25 : 1}
+                    opacity={isDim ? 0.25 : 1}
                   />
                 )
               })}
@@ -79,7 +70,6 @@ export const IncomePie = ({ data, total }: Props) => {
         </ResponsiveContainer>
       </div>
 
-      {/* 凡例（クリックで選択） */}
       <div className="pieLegend">
         {data.map(d => {
           const isActive = activeCategory === d.name
@@ -88,15 +78,12 @@ export const IncomePie = ({ data, total }: Props) => {
               type="button"
               key={d.name}
               className={`legendRowButton ${isActive ? 'active' : ''}`}
-              onClick={() =>
-                setActiveCategory(prev => (prev === d.name ? null : d.name))
-              }
+              onClick={() => setActiveCategory(prev => (prev === d.name ? null : d.name))}
             >
-              <span
-                className="legendColor"
-                style={{ backgroundColor: CATEGORY_COLORS[d.name] ?? '#9ca3af' }}
-              />
-              <span className="legendName">{d.name}</span>
+              <span className="legendLeft">
+                <span className="legendColor" style={{ backgroundColor: CATEGORY_COLORS[d.name] ?? '#9ca3af' }} />
+                <span className="legendName">{d.name}</span>
+              </span>
               <span className="legendValue">¥{d.value.toLocaleString()}</span>
             </button>
           )

@@ -79,43 +79,40 @@ export const selectTotalFromPie = (pieData: { name: string; value: number }[]) =
   return pieData.reduce((sum, d) => sum + d.value, 0)
 }
 
-export const buildHomeViewModel = (params: {
-  accounts: Account[]
-  monthKey: MonthKey
-  viewMode: ViewMode
-  sortKey: SortKey
-  draftDate: string
-}) => {
-  const monthOptions = selectMonthOptions(params.accounts, params.draftDate)
-  const accountsByPeriod = selectAccountsByPeriod(params.accounts, params.monthKey)
-  const accountsByMode = selectAccountsByMode(accountsByPeriod, params.viewMode)
-  const visibleAccounts = selectVisibleAccounts(accountsByMode, params.sortKey)
-  const totals = selectTotals(accountsByPeriod)
-  const expensePieData = selectPieData(accountsByPeriod, 'EXPENSE')
-  const incomePieData = selectPieData(accountsByPeriod, 'INCOME')
-  return {
-    monthOptions,
-    accountsByPeriod,
-    visibleAccounts,
-    totals,
-    expensePieData,
-    incomePieData,
-    expenseTotal: selectTotalFromPie(expensePieData),
-    incomeTotal: selectTotalFromPie(incomePieData),
+/** ★追加：存在する最新の月(YYYY-MM)を返す */
+export const selectLatestMonthKey = (accounts: Account[], fallbackDate: string): string => {
+  const months = new Set<string>()
+  months.add(fallbackDate.slice(0, 7))
+  for (const a of accounts) {
+    if (typeof a.date === 'string' && a.date.length >= 7) months.add(a.date.slice(0, 7))
   }
+  return Array.from(months).sort((a, b) => (a < b ? 1 : -1))[0]
 }
 
-export const selectDerived = (accounts: Account[], draftDate: string, monthKey: MonthKey, viewMode: ViewMode, sortKey: SortKey) => {
-  const monthOptions = selectMonthOptions(accounts, draftDate)
-  const accountsByPeriod = selectAccountsByPeriod(accounts, monthKey)
-  const accountsByMode = selectAccountsByMode(accountsByPeriod, viewMode)
-  const visibleAccounts = selectVisibleAccounts(accountsByMode, sortKey)
-  const totals = selectTotals(accountsByPeriod)
+/** ★追加：月ごとの「収入/支出/収支」を返す（折れ線用） */
+export type MonthlyBalancePoint = {
+  monthKey: string // YYYY-MM
+  income: number
+  expense: number
+  balance: number
+}
 
-  const expensePieData = selectPieData(accountsByPeriod, 'EXPENSE')
-  const expenseTotal = selectTotalFromPie(expensePieData)
-  const incomePieData = selectPieData(accountsByPeriod, 'INCOME')
-  const incomeTotal = selectTotalFromPie(incomePieData)
+export const selectMonthlyBalances = (accounts: Account[]): MonthlyBalancePoint[] => {
+  const map = new Map<string, { income: number; expense: number }>()
+  for (const a of accounts) {
+    const mk = a.date.slice(0, 7)
+    const cur = map.get(mk) ?? { income: 0, expense: 0 }
+    if (a.type === 'INCOME') cur.income += a.amount
+    if (a.type === 'EXPENSE') cur.expense += a.amount
+    map.set(mk, cur)
+  }
 
-  return { monthOptions, accountsByPeriod, accountsByMode, visibleAccounts, totals, expensePieData, expenseTotal, incomePieData, incomeTotal }
+  return Array.from(map.entries())
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1)) // 古い→新しい（折れ線は左から時系列が見やすい）
+    .map(([monthKey, v]) => ({
+      monthKey,
+      income: v.income,
+      expense: v.expense,
+      balance: v.income - v.expense,
+    }))
 }

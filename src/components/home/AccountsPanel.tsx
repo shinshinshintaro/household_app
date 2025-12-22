@@ -2,20 +2,22 @@ import type { Account } from '../../types/Account'
 import type { MonthKey, SortKey, ViewMode } from '../../selectors/accountSelectors'
 import { formatMonthJP, getRowKey } from '../../selectors/accountSelectors'
 
-type Totals = { income: number; expense: number; balance: number }
-
 type Props = {
   modeLabel: string
   periodLabel: string
-  totals: Totals
+
   viewMode: ViewMode
   setViewMode: (v: ViewMode) => void
+
   monthKey: MonthKey
   setMonthKey: (m: MonthKey) => void
+
   sortKey: SortKey
   setSortKey: (s: SortKey) => void
+
   monthOptions: string[]
   visibleAccounts: Account[]
+
   onEdit: (a: Account) => void
   onDelete: (a: Account) => void
 }
@@ -23,7 +25,6 @@ type Props = {
 export function AccountsPanel({
   modeLabel,
   periodLabel,
-  totals,
   viewMode,
   setViewMode,
   monthKey,
@@ -39,21 +40,8 @@ export function AccountsPanel({
     <div className="card">
       <div className="listHeader">
         <div className="listHeaderLeft">
-          <h2>
-            家計簿一覧（{modeLabel} / {periodLabel}）
-          </h2>
-
-          <div className="summaryRow">
-            <span className="summaryItem">
-              収入：<b>¥{totals.income.toLocaleString()}</b>
-            </span>
-            <span className="summaryItem">
-              支出：<b>¥{totals.expense.toLocaleString()}</b>
-            </span>
-            <span className="summaryItem">
-              収支：<b>¥{totals.balance.toLocaleString()}</b>
-            </span>
-          </div>
+          <h2>家計簿一覧（{modeLabel} / {periodLabel}）</h2>
+          {/* ②：ここにあったサマリ表示は削除（→ 月次サマリへ移動） */}
         </div>
 
         <div className="controls">
@@ -87,21 +75,25 @@ export function AccountsPanel({
         <ul className="list">
           {visibleAccounts.map((a, index) => (
             <li key={getRowKey(a, index)} className="row">
-              <div>
+              {/* ①：日付を「種別とカテゴリの間」にする */}
+              <div className="rowLeft">
                 <span className={`badge ${a.type === 'EXPENSE' ? 'badgeExpense' : 'badgeIncome'}`}>
                   {a.type === 'EXPENSE' ? '支出' : '収入'}
                 </span>
-                <div className="subText">{a.date}</div>
               </div>
 
-              <div>
-                <b>{a.category}</b>
-                {a.memo && <div className="subText">メモ: {a.memo}</div>}
+              <div className="rowMid">
+                <div className="subText">{a.date}</div>
+                <div>
+                  <b>{a.category}</b>
+                  {a.memo && <div className="subText">メモ: {a.memo}</div>}
+                </div>
               </div>
 
               <div className="rowRight">
                 <div className="amount">¥{a.amount.toLocaleString()}</div>
 
+                {/* ②：金額の右側にボタン（CSSで横並びにしてね。今のあなたのCSSなら大丈夫なはず） */}
                 <div className="rowActions">
                   <button className="miniBtn" onClick={() => onEdit(a)}>
                     編集
