@@ -56,6 +56,17 @@ export const useAccounts = (storageKey: string) => {
   }, [accounts, storageKey])
 
   const addAccount = (draft: Draft) => {
+
+    const MEMO_MAX = 10
+
+    const validateMemo = (memo: string) => {
+      if (memo.length > MEMO_MAX) {
+        alert(`備考は${MEMO_MAX}文字以内で入力してください`)
+        return false
+      }
+      return true
+    }
+
     const amountNum = parseAmount(draft.amount)
     if (amountNum === null) {
       alert('金額は「1円以上の整数」で、最大12桁まで入力できます（小数は不可）')
@@ -76,6 +87,17 @@ export const useAccounts = (storageKey: string) => {
   }
 
   const updateAccount = (editingId: number, draft: Draft) => {
+    
+    const MEMO_MAX = 10
+
+    const validateMemo = (memo: string) => {
+      if (memo.length > MEMO_MAX) {
+        alert(`備考は${MEMO_MAX}文字以内で入力してください`)
+        return false
+      }
+      return true
+    }
+
     const amountNum = parseAmount(draft.amount)
     if (amountNum === null) {
       alert('金額を正しく入力してください')

@@ -2,13 +2,9 @@ import type { Account } from '../../types/Account'
 import type { MonthKey, SortKey, ViewMode } from '../../selectors/accountSelectors'
 import { formatMonthJP, getRowKey } from '../../selectors/accountSelectors'
 
-type Totals = { income: number; expense: number; balance: number }
-
 type Props = {
   modeLabel: string
   periodLabel: string
-
-  totals: Totals
 
   viewMode: ViewMode
   setViewMode: (v: ViewMode) => void
@@ -47,7 +43,7 @@ export const AccountsPanel = ({
           <h2>
             家計簿一覧（{modeLabel} / {periodLabel}）
           </h2>
-          {/* ②：ここにあった summaryRow は削除して月次サマリへ */}
+          {/* summaryRow は月次サマリへ移動済み */}
         </div>
 
         <div className="controls">
@@ -80,31 +76,32 @@ export const AccountsPanel = ({
       ) : (
         <ul className="list">
           {visibleAccounts.map((a, index) => (
-            <li key={getRowKey(a, index)} className="row">
-              <div>
+            <li key={getRowKey(a, index)} className="row rowGrid">
+              <div className="rowType">
                 <span className={`badge ${a.type === 'EXPENSE' ? 'badgeExpense' : 'badgeIncome'}`}>
                   {a.type === 'EXPENSE' ? '支出' : '収入'}
                 </span>
               </div>
 
-              {/* 日付は「種別とカテゴリの間」 */}
-              <div className="subText">{a.date}</div>
+              <div className="rowDate subText">{a.date}</div>
 
-              <div>
+              <div className="rowCategory">
                 <b>{a.category}</b>
-                {a.memo && <div className="subText">メモ: {a.memo}</div>}
               </div>
 
-              <div className="rowRight">
-                <div className="amount">¥{a.amount.toLocaleString()}</div>
-                <div className="rowActions">
-                  <button className="miniBtn" onClick={() => onEdit(a)}>
-                    編集
-                  </button>
-                  <button className="miniBtn miniBtnDanger" onClick={() => onDelete(a)}>
-                    削除
-                  </button>
-                </div>
+              <div className="rowMemo subText" title={a.memo ?? ''}>
+                {a.memo ? a.memo : ''}
+              </div>
+
+              <div className="rowAmount amount">¥{a.amount.toLocaleString()}</div>
+
+              <div className="rowActions">
+                <button className="miniBtn" onClick={() => onEdit(a)}>
+                  編集
+                </button>
+                <button className="miniBtn miniBtnDanger" onClick={() => onDelete(a)}>
+                  削除
+                </button>
               </div>
             </li>
           ))}

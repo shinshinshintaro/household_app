@@ -49,16 +49,19 @@ export const Home = () => {
 
   const expensePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'EXPENSE'), [accountsByPeriod])
   const expenseTotal = useMemo(() => S.selectTotalFromPie(expensePieData), [expensePieData])
+
   const incomePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'INCOME'), [accountsByPeriod])
   const incomeTotal = useMemo(() => S.selectTotalFromPie(incomePieData), [incomePieData])
 
-  // 月次サマリ用（ALLなら最新月を表示）
+  // 月次サマリ用（ALLなら最新月）
   const latestMonthKey = useMemo(() => S.selectLatestMonthKey(accounts, draft.date), [accounts, draft.date])
   const summaryMonthKey = monthKey === 'ALL' ? latestMonthKey : monthKey
+
   const accountsForSummaryMonth = useMemo(
     () => S.selectAccountsByPeriod(accounts, summaryMonthKey),
     [accounts, summaryMonthKey],
   )
+
   const summaryTotals = useMemo(() => S.selectTotals(accountsForSummaryMonth), [accountsForSummaryMonth])
   const monthly = useMemo(() => S.selectMonthlyBalances(accounts), [accounts])
 
@@ -96,14 +99,12 @@ export const Home = () => {
 
   return (
     <div className="container">
-      {/* ①：確実に中央寄せ（CSSに依存しない） */}
-      <h1 className="title" style={{ textAlign: 'center' }}>
-        家計簿アプリ
-      </h1>
+      {/* ✅ ① タイトル中央 */}
+      <h1 className="title titleCenter">家計簿アプリ</h1>
 
       <div className="layout">
-        {/* 左：月次サマリ＋目標貯金 */}
-        <div className="left">
+        {/* ✅ 左：被らないように sidebar に隔離 */}
+        <div className="sidebar">
           <MonthlySummaryCard
             titleMonthKey={summaryMonthKey}
             monthly={monthly}
@@ -113,11 +114,14 @@ export const Home = () => {
             targetSavings={target}
           />
 
-          <TargetSavingsCard initialValue={target} onSave={saveTargetFromInput} />
+          <TargetSavingsCard
+            target={target}
+            onSave={saveTargetFromInput}
+          />
         </div>
 
-        {/* 中央：入力＋一覧 */}
-        <div className="center">
+        {/* ✅ 中央：main */}
+        <div className="main">
           <EntryForm
             draft={draft}
             setDraft={setDraft}
@@ -139,7 +143,6 @@ export const Home = () => {
           <AccountsPanel
             modeLabel={modeLabel}
             periodLabel={periodLabel}
-            totals={{ income: 0, expense: 0, balance: 0 }} // ※ AccountsPanel側から summaryRow消したので実質未使用
             viewMode={viewMode}
             setViewMode={setViewMode}
             monthKey={monthKey}
@@ -153,7 +156,7 @@ export const Home = () => {
           />
         </div>
 
-        {/* 右：円グラフ */}
+        {/* ✅ 右：円グラフ */}
         <div className="right">
           <PiePanel
             periodLabel={periodLabel}

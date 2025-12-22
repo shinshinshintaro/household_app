@@ -19,6 +19,8 @@ type Props = {
   incomeCategories: readonly string[]
 }
 
+const MEMO_MAX = 10
+
 export function EntryForm({
   draft,
   setDraft,
@@ -83,17 +85,17 @@ export function EntryForm({
           <input
             className="input inputShort"
             inputMode="numeric"
-            pattern="[0-9,]*"
             value={draft.amount}
             onChange={e => setDraft(prev => ({ ...prev, amount: e.target.value }))}
           />
         </div>
 
-        <div className="field">
-          <label>備考</label>
+        <div className="field fieldMemo">
+          <label>備考（{MEMO_MAX}文字以内）</label>
           <input
             className="input inputMemo"
             value={draft.memo}
+            maxLength={MEMO_MAX}
             onChange={e => setDraft(prev => ({ ...prev, memo: e.target.value }))}
           />
         </div>
