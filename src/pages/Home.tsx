@@ -2,13 +2,11 @@ import { useMemo, useState } from 'react'
 import type { Account } from '../types/Account'
 import { useAccounts } from '../hooks/useAccounts'
 import { useFilters } from '../hooks/useFilters'
-import { useTargetSavings } from '../hooks/useTargetSavings'
 import * as S from '../selectors/accountSelectors'
 import { EntryForm } from '../components/home/EntryForm'
 import { AccountsPanel } from '../components/home/AccountsPanel'
 import { PiePanel } from '../components/PiePanel'
 import { MonthlySummaryCard } from '../components/home/MonthlySummary'
-import { TargetSavingsCard } from '../components/TargetSavingsCard'
 
 type Draft = {
   date: string
@@ -23,11 +21,9 @@ const INCOME_CATEGORIES = ['給料', '副業', '給付金', '配当', 'その他
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = 'household-app-data'
-const TARGET_KEY = 'household-target-savings'
 
 export const Home = () => {
   const { accounts, addAccount, updateAccount, deleteAccount } = useAccounts(STORAGE_KEY)
-  const { target, saveTargetFromInput } = useTargetSavings(TARGET_KEY)
 
   const [draft, setDraft] = useState<Draft>({
     date: today(),
@@ -111,10 +107,7 @@ export const Home = () => {
             income={summaryTotals.income}
             expense={summaryTotals.expense}
             balance={summaryTotals.balance}
-            targetSavings={target}
           />
-
-          <TargetSavingsCard initialValue={target} onSave={saveTargetFromInput} />
         </div>
 
         {/* ✅ 中央：main */}

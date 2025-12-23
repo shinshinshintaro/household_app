@@ -18,7 +18,6 @@ type Props = {
   income: number
   expense: number
   balance: number
-  targetSavings: number
 }
 
 const yen = (n: number) => `¥${n.toLocaleString()}`
@@ -29,11 +28,8 @@ export const MonthlySummaryCard = ({
   income,
   expense,
   balance,
-  targetSavings,
 }: Props) => {
-  const diff = balance - targetSavings
   const balanceClass = balance >= 0 ? 'summaryGreen' : 'summaryRed'
-  const diffClass = diff >= 0 ? 'summaryGreen' : 'summaryRed'
 
   const chartData = useMemo(() => {
     return monthly.map(m => ({
@@ -64,13 +60,7 @@ export const MonthlySummaryCard = ({
           収支：<b>{yen(balance)}</b>
         </span>
         <br />
-        <span className="summaryItem summaryBlue">
-          今月の目標貯金：<b>{yen(targetSavings)}</b>
-        </span>
         <br />
-        <span className={`summaryItem ${diffClass}`}>
-          差額（収支と今月の目標貯金の差）：<b>{yen(diff)}</b>
-        </span>
       </div>
 
       {/* ③④⑤：¥付き・折れ線・細め・鮮やか・凡例に「収支表」 */}
