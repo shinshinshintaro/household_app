@@ -1,4 +1,5 @@
 import type { Account } from '../types/Account'
+import * as C from '../constants/categories'
 
 export type SortKey = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 export type ViewMode = 'BALANCE' | 'INCOME' | 'EXPENSE'
@@ -68,14 +69,92 @@ export const selectAccountsByMode = (accountsByPeriod: Account[], viewMode: View
 
 export const selectVisibleAccounts = (accountsByMode: Account[], sortKey: SortKey) => {
   const arr = [...accountsByMode]
+
+  // 収支混在時の “種別順”
+  // 好みで EXPENSE を先にしたければ、数値を入れ替えてOK
+  const TYPE_ORDER: Record<Account['type'], number> = {
+    INCOME: 0,
+    EXPENSE: 1,
+  }
+
+  // 「type:category」→固定順（categories.ts の並びをそのまま使う）
+  const expenseEntries: Array<[string, number]> = Array.from(C.EXPENSE_CATEGORIES).map(
+    (c, i) => [`EXPENSE:${c}`, i]
+  )
+  const incomeEntries: Array<[string, number]> = Array.from(C.INCOME_CATEGORIES).map(
+    (c, i) => [`INCOME:${c}`, i]
+  )
+
+  const CATEGORY_ORDER = new Map<string, number>([...expenseEntries, ...incomeEntries])
+
+  const typeCompare = (a: Account, b: Account) => TYPE_ORDER[a.type] - TYPE_ORDER[b.type]
+
+  const categoryCompare = (a: Account, b: Account) => {
+    const ao = CATEGORY_ORDER.get(`${a.type}:${a.category}`)
+    const bo = CATEGORY_ORDER.get(`${b.type}:${b.category}`)
+    if (ao != null && bo != null) return ao - bo
+    if (ao != null) return -1
+    if (bo != null) return 1
+    return a.category.localeCompare(b.category, 'ja')
+  }
+
+  const stableCompare = (a: Account, b: Account) => {
+    const aid = getSafeId(a) ?? Number.MAX_SAFE_INTEGER
+    const bid = getSafeId(b) ?? Number.MAX_SAFE_INTEGER
+    if (aid !== bid) return aid - bid
+    const ak = `${a.date}|${a.type}|${a.category}|${a.amount}`
+    const bk = `${b.date}|${b.type}|${b.category}|${b.amount}`
+    return ak.localeCompare(bk, 'ja')
+  }
+
   arr.sort((a, b) => {
-    if (sortKey === 'date-desc') return b.date.localeCompare(a.date)
-    if (sortKey === 'date-asc') return a.date.localeCompare(b.date)
-    if (sortKey === 'amount-desc') return b.amount - a.amount
-    return a.amount - b.amount
+    if (sortKey === 'date-desc') {
+      const d = b.date.localeCompare(a.date)
+      if (d !== 0) return d
+      const t = typeCompare(a, b)         // ★同日なら種別
+      if (t !== 0) return t
+      const c = categoryCompare(a, b)     // ★同日・同種別ならカテゴリ
+      if (c !== 0) return c
+      return stableCompare(a, b)
+    }
+
+    if (sortKey === 'date-asc') {
+      const d = a.date.localeCompare(b.date)
+      if (d !== 0) return d
+      const t = typeCompare(a, b)
+      if (t !== 0) return t
+      const c = categoryCompare(a, b)
+      if (c !== 0) return c
+      return stableCompare(a, b)
+    }
+
+    if (sortKey === 'amount-desc') {
+      const d = b.amount - a.amount
+      if (d !== 0) return d
+      const dd = b.date.localeCompare(a.date)
+      if (dd !== 0) return dd
+      const t = typeCompare(a, b)
+      if (t !== 0) return t
+      const c = categoryCompare(a, b)
+      if (c !== 0) return c
+      return stableCompare(a, b)
+    }
+
+    // amount-asc
+    const d = a.amount - b.amount
+    if (d !== 0) return d
+    const dd = b.date.localeCompare(a.date)
+    if (dd !== 0) return dd
+    const t = typeCompare(a, b)
+    if (t !== 0) return t
+    const c = categoryCompare(a, b)
+    if (c !== 0) return c
+    return stableCompare(a, b)
   })
+
   return arr
 }
+
 
 export const selectTotals = (accountsByPeriod: Account[]) => {
   let income = 0
