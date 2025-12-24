@@ -10,27 +10,24 @@ type Props = {
   incomeTotal: number
 }
 
-export function PiePanel({
-  periodLabel,
-  expensePieData,
-  expenseTotal,
-  incomePieData,
-  incomeTotal,
-}: Props) {
+export function PiePanel({ periodLabel, expensePieData, expenseTotal, incomePieData, incomeTotal }: Props) {
   return (
     <Card variant="outlined">
       <CardHeader title={`円グラフ（${periodLabel}）`} />
+
       <CardContent>
-        <Stack spacing={2} divider={<Divider flexItem />}>
+        <Stack spacing={2}>
           <div>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               支出
             </Typography>
             <ExpensePie data={expensePieData} total={expenseTotal} />
           </div>
 
+          <Divider />
+
           <div>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               収入
             </Typography>
             <IncomePie data={incomePieData} total={incomeTotal} />

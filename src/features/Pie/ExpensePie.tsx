@@ -1,9 +1,7 @@
+// ExpensePie.tsx
 import { BasePie, type PieDatum } from './BasePie'
 
-type Props = {
-  data: PieDatum[]
-  total: number
-}
+type Props = { data: PieDatum[]; total: number }
 
 const CATEGORY_COLORS: Record<string, string> = {
   食費: '#2563eb',
@@ -17,12 +15,5 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export function ExpensePie({ data, total }: Props) {
-  return (
-    <BasePie
-      emptyText="この期間の支出データがありません"
-      data={data}
-      total={total}
-      colors={CATEGORY_COLORS}
-    />
-  )
+  return <BasePie emptyText="支出データがありません" data={data} total={total} colors={CATEGORY_COLORS} />
 }

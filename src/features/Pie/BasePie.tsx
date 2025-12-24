@@ -1,29 +1,20 @@
-// src/components/Pie/BasePie.tsx
 import { useMemo, useState } from 'react'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { TooltipProps } from 'recharts'
 
 export type PieDatum = { name: string; value: number }
 
 type Props = {
-  /** データが無い時に表示する文言 */
   emptyText: string
-  /** 円グラフのデータ (name = カテゴリ名, value = 金額) */
   data: PieDatum[]
-  /** 合計金額（表示用。data合計と一致している想定） */
   total: number
-  /** name -> color */
   colors: Record<string, string>
 }
 
 const toYen = (n: number) => `¥${Math.trunc(n).toLocaleString('ja-JP')}`
 
-/**
- * Recharts Tooltip の formatter は value が number とは限らず
- * string / number / (string|number)[] などで来ることがあります。
- * TooltipProps から formatter の型を取っておくと、型ズレで赤波線が出ません。
- */
-const tooltipFormatter: NonNullable<TooltipProps<number, string>['formatter']> = (value) => {
+const tooltipFormatter: NonNullable<TooltipProps<number, string>['formatter']> = value => {
   const n = typeof value === 'number' ? value : Number(value)
   return toYen(Number.isFinite(n) ? n : 0)
 }
@@ -33,39 +24,51 @@ export function BasePie({ emptyText, data, total, colors }: Props) {
 
   const activeValue = useMemo(() => {
     if (!activeCategory) return null
-    const found = data.find((d) => d.name === activeCategory)
+    const found = data.find(d => d.name === activeCategory)
     return found?.value ?? null
   }, [activeCategory, data])
 
   const toggleCategory = (name: string) => {
-    setActiveCategory((prev) => (prev === name ? null : name))
+    setActiveCategory(prev => (prev === name ? null : name))
   }
 
   if (!data.length || total === 0) {
-    return <p className="text-sm text-gray-500">{emptyText}</p>
+    return (
+      <Box sx={{ py: 1 }}>
+        <Typography variant="body2" color="text.secondary">
+          {emptyText}
+        </Typography>
+      </Box>
+    )
   }
 
   return (
-    <div className="w-full">
-      {activeCategory && (
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm">
-            <span className="font-semibold">{activeCategory}</span>
-            <span className="ml-2 text-gray-600">
-              {activeValue != null ? toYen(activeValue) : ''}
-            </span>
-          </p>
-          <button
-            type="button"
-            onClick={() => setActiveCategory(null)}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            クリア
-          </button>
-        </div>
-      )}
+    <Stack spacing={1}>
+      <Box>
+        <Typography variant="caption" color="text.secondary">
+          合計
+        </Typography>
+        <Typography variant="h6" fontWeight={800}>
+          {toYen(total)}
+        </Typography>
 
-      <div className="h-56 w-full">
+        {activeCategory ? (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body2" fontWeight={700}>
+              {activeCategory}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {activeValue != null ? toYen(activeValue) : ''}
+            </Typography>
+            <Button size="small" onClick={() => setActiveCategory(null)}>
+              クリア
+            </Button>
+          </Stack>
+        ) : null}
+      </Box>
+
+      {/* ✅ ResponsiveContainer は「親に高さがない」と描画されません */}
+      <Box sx={{ width: '100%', height: 220 }}>
         <ResponsiveContainer>
           <PieChart>
             <Tooltip formatter={tooltipFormatter} />
@@ -82,13 +85,31 @@ export function BasePie({ emptyText, data, total, colors }: Props) {
                 toggleCategory(clicked.name)
               }}
             >
-              {data.map((d) => (
-                <Cell key={d.name} fill={colors[d.name] ?? '#999'} />
+              {data.map(d => (
+                <Cell
+                  key={d.name}
+                  fill={colors[d.name] ?? '#9ca3af'}
+                  opacity={!activeCategory || activeCategory === d.name ? 1 : 0.25}
+                />
               ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-      </div>
-    </div>
+      </Box>
+
+      <Stack spacing={0.5}>
+        {data.map(d => (
+          <Button
+            key={d.name}
+            variant={activeCategory === d.name ? 'contained' : 'outlined'}
+            onClick={() => toggleCategory(d.name)}
+            sx={{ justifyContent: 'space-between' }}
+          >
+            <span>{d.name}</span>
+            <span>{toYen(d.value)}</span>
+          </Button>
+        ))}
+      </Stack>
+    </Stack>
   )
 }

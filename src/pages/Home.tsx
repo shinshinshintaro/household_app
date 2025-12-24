@@ -7,7 +7,7 @@ import { useFilters } from '../hooks/useFilters'
 import * as S from '../selectors/accountSelectors'
 import * as index from '../features/dashboard/Index'
 import { PiePanel } from '../features/PiePanel'
-import { Container, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography, Box } from '@mui/material'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = 'household-app-data'
@@ -24,27 +24,21 @@ export const Home = () => {
   })
 
   const { viewMode, setViewMode, monthKey, setMonthKey, sortKey, setSortKey } = useFilters(draft.date)
-
   const [editingId, setEditingId] = useState<number | null>(null)
 
-  // 種別に応じたカテゴリ候補
   const categories = draft.type === 'EXPENSE' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
 
-  // 月プルダウン候補
   const monthOptions = useMemo(() => S.selectMonthOptions(accounts, draft.date), [accounts, draft.date])
 
-  // 一覧用（期間→モード→ソート）
   const accountsByPeriod = useMemo(() => S.selectAccountsByPeriod(accounts, monthKey), [accounts, monthKey])
   const accountsByMode = useMemo(() => S.selectAccountsByMode(accountsByPeriod, viewMode), [accountsByPeriod, viewMode])
   const visibleAccounts = useMemo(() => S.selectVisibleAccounts(accountsByMode, sortKey), [accountsByMode, sortKey])
 
-  // 円グラフ用
   const expensePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'EXPENSE'), [accountsByPeriod])
   const expenseTotal = useMemo(() => S.selectTotalFromPie(expensePieData), [expensePieData])
   const incomePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'INCOME'), [accountsByPeriod])
   const incomeTotal = useMemo(() => S.selectTotalFromPie(incomePieData), [incomePieData])
 
-  // 月次サマリ用：ALLのときは最新月で表示
   const latestMonthKey = useMemo(() => S.selectLatestMonthKey(accounts, draft.date), [accounts, draft.date])
   const summaryMonthKey = monthKey === 'ALL' ? latestMonthKey : monthKey
 
@@ -63,7 +57,6 @@ export const Home = () => {
       onResetDraft()
       return
     }
-
     updateAccount(editingId, draft)
     setEditingId(null)
     onResetDraft()
@@ -75,7 +68,6 @@ export const Home = () => {
       alert('この行はidが無いので編集できません（古いデータの可能性）')
       return
     }
-
     setEditingId(id)
     setDraft({
       date: a.date,
@@ -90,70 +82,69 @@ export const Home = () => {
   const modeLabel = viewMode === 'BALANCE' ? '収支' : viewMode === 'INCOME' ? '収入' : '支出'
 
   return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
+    <Container
+      maxWidth={false}
+      sx={{ py: 3, maxWidth: 1500, mx: 'auto' }}
+    >
       <Stack spacing={2}>
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" fontWeight={700} textAlign="center">
           家計簿アプリ
         </Typography>
 
-      <div className="homeGrid">
-        {/* 左：月次 */}
-        <aside className="leftPane">
-          <index.MonthlySummaryCard
-            titleMonthKey={summaryMonthKey}
-            monthly={monthly}
-            income={summaryTotals.income}
-            expense={summaryTotals.expense}
-            balance={summaryTotals.balance}
-          />
-        </aside>
+        {/* CSSの3カラムグリッドをそのまま使う */}
+        <Box className="homeGrid">
+          <aside className="leftPane">
+            <index.MonthlySummaryCard
+              titleMonthKey={summaryMonthKey}
+              monthly={monthly}
+              income={summaryTotals.income}
+              expense={summaryTotals.expense}
+              balance={summaryTotals.balance}
+            />
+          </aside>
 
-        {/* 中央：入力 と 一覧 */}
-        <main className="mainPane">
-          <index.EntryForm
-            draft={draft}
-            setDraft={setDraft}
-            categories={categories}
-            editing={editingId !== null}
-            onSubmit={onAddOrUpdate}
-            onCancelEdit={() => {
-              setEditingId(null)
-              onResetDraft()
-            }}
-            expenseCategories={EXPENSE_CATEGORIES}
-            incomeCategories={INCOME_CATEGORIES}
-          />
+          <main className="mainPane">
+            <index.EntryForm
+              draft={draft}
+              setDraft={setDraft}
+              categories={categories}
+              editing={editingId !== null}
+              onSubmit={onAddOrUpdate}
+              onCancelEdit={() => {
+                setEditingId(null)
+                onResetDraft()
+              }}
+              expenseCategories={EXPENSE_CATEGORIES}
+              incomeCategories={INCOME_CATEGORIES}
+            />
 
-          <index.AccountsPanel
-            modeLabel={modeLabel}
-            periodLabel={periodLabel}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            monthKey={monthKey}
-            setMonthKey={setMonthKey}
-            sortKey={sortKey}
-            setSortKey={setSortKey}
-            monthOptions={monthOptions}
-            visibleAccounts={visibleAccounts}
-            onEdit={onEdit}
-            onDelete={deleteAccount}
-          />
-        </main>
+            <index.AccountsPanel
+              modeLabel={modeLabel}
+              periodLabel={periodLabel}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              monthKey={monthKey}
+              setMonthKey={setMonthKey}
+              sortKey={sortKey}
+              setSortKey={setSortKey}
+              monthOptions={monthOptions}
+              visibleAccounts={visibleAccounts}
+              onEdit={onEdit}
+              onDelete={deleteAccount}
+            />
+          </main>
 
-        {/* 右：円グラフ */}
-        <aside className="rightPane">
-          <PiePanel
-            periodLabel={periodLabel}
-            expensePieData={expensePieData}
-            expenseTotal={expenseTotal}
-            incomePieData={incomePieData}
-            incomeTotal={incomeTotal}
-          />
-        </aside>
-      </div>
+          <aside className="rightPane">
+            <PiePanel
+              periodLabel={periodLabel}
+              expensePieData={expensePieData}
+              expenseTotal={expenseTotal}
+              incomePieData={incomePieData}
+              incomeTotal={incomeTotal}
+            />
+          </aside>
+        </Box>
       </Stack>
     </Container>
   )
 }
-// TODO: homeGrid / leftPane 等も MUI Grid に寄せる余地あり
-// 今回はレイアウトCSSを残す方針で対応
