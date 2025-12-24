@@ -155,3 +155,5 @@ export const Home = () => {
     </Container>
   )
 }
+// TODO: homeGrid / leftPane 等も MUI Grid に寄せる余地あり
+// 今回はレイアウトCSSを残す方針で対応

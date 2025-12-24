@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { Box, Card, CardContent, CardHeader, Divider, Stack, Typography } from '@mui/material'
 import type { MonthlyBalancePoint } from '../../selectors/accountSelectors'
 import { formatMonthJP } from '../../selectors/accountSelectors'
 
@@ -29,10 +30,6 @@ export const MonthlySummaryCard = ({
   expense,
   balance,
 }: Props) => {
-  // 収支の色はCSS側に寄せる（人間が直しやすい）
-  const balanceClass = balance >= 0 ? 'summaryGreen' : 'summaryRed'
-
-  // recharts用に表示文字列だけ整形
   const chartData = useMemo(
     () =>
       monthly.map(m => ({
@@ -43,42 +40,56 @@ export const MonthlySummaryCard = ({
   )
 
   return (
-    <section className="panel">
-      <h2 className="panelTitle">月次サマリ</h2>
+    <Card variant="outlined">
+      <CardHeader title="月次サマリ" />
 
-      {/* 最新月の集計（ALL表示でも、ここは「最新月」を渡す運用） */}
-      <div className="summaryBlock">
-        <div className="summaryTitle">{formatMonthJP(titleMonthKey)}の収支</div>
+      <CardContent>
+        <Stack spacing={2}>
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary">
+              {formatMonthJP(titleMonthKey)}の収支
+            </Typography>
 
-        <div className="summaryRow">
-          <span className="summaryLabel">収入</span>
-          <span className="summaryValue">{yen(income)}</span>
-        </div>
+            <Stack spacing={1} sx={{ mt: 1 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">収入</Typography>
+                <Typography variant="body1">{yen(income)}</Typography>
+              </Stack>
 
-        <div className="summaryRow">
-          <span className="summaryLabel">支出</span>
-          <span className="summaryValue">{yen(expense)}</span>
-        </div>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">支出</Typography>
+                <Typography variant="body1">{yen(expense)}</Typography>
+              </Stack>
 
-        <div className="summaryRow">
-          <span className="summaryLabel">収支</span>
-          <span className={`summaryValue ${balanceClass}`}>{yen(balance)}</span>
-        </div>
-      </div>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">収支</Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: 700 }}
+                  color={balance >= 0 ? 'success.main' : 'error.main'}
+                >
+                  {yen(balance)}
+                </Typography>
+              </Stack>
+            </Stack>
+          </Box>
 
-      {/* 折れ線グラフ（全期間ベース） */}
-      <div className="chartWrap">
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis tickFormatter={(v: number) => yen(Number(v))} />
-            <Tooltip formatter={(v: unknown) => yen(Number(v))} />
-            <Legend />
-            <Line type="monotone" dataKey="balance" name="収支" dot={false} strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </section>
+          <Divider />
+
+          <Box sx={{ width: '100%', height: 220 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis tickFormatter={(v: number) => yen(Number(v))} />
+                <Tooltip formatter={(v: unknown) => yen(Number(v))} />
+                <Legend />
+                <Line type="monotone" dataKey="balance" name="収支" dot={false} strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </Box>
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }

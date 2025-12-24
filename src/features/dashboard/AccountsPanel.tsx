@@ -1,3 +1,20 @@
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Divider,
+  FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from '@mui/material'
 import type { Account } from '../../types/Account'
 import type { MonthKey, SortKey, ViewMode } from '../../selectors/accountSelectors'
 import { formatMonthJP, getRowKey } from '../../selectors/accountSelectors'
@@ -36,82 +53,131 @@ export const AccountsPanel = ({
   onDelete,
 }: Props) => {
   return (
-    <section className="panel">
-      <h2 className="panelTitle">
-        家計簿一覧（{modeLabel} / {periodLabel}）
-      </h2>
+    <Card variant="outlined">
+      <CardHeader title={`家計簿一覧（${modeLabel} / ${periodLabel}）`} />
 
-      {/* フィルタ類は「上に固める」ほうが見通し良い */}
-      <div className="controlsRow">
-        <label className="control">
-          <span className="controlLabel">表示</span>
-          <select value={viewMode} onChange={e => setViewMode(e.target.value as ViewMode)}>
-            <option value="BALANCE">収支</option>
-            <option value="INCOME">収入</option>
-            <option value="EXPENSE">支出</option>
-          </select>
-        </label>
+      <CardContent>
+        <Stack spacing={2}>
+          {/* Filters */}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <FormControl fullWidth>
+              <InputLabel>表示</InputLabel>
+              <Select
+                label="表示"
+                value={viewMode}
+                onChange={e => setViewMode(e.target.value as ViewMode)}
+              >
+                <MenuItem value="BALANCE">収支</MenuItem>
+                <MenuItem value="INCOME">収入</MenuItem>
+                <MenuItem value="EXPENSE">支出</MenuItem>
+              </Select>
+            </FormControl>
 
-        <label className="control">
-          <span className="controlLabel">期間</span>
-          <select value={monthKey} onChange={e => setMonthKey(e.target.value as MonthKey)}>
-            <option value="ALL">全期間</option>
-            {monthOptions.map(m => (
-              <option key={m} value={m}>
-                {formatMonthJP(m)}
-              </option>
-            ))}
-          </select>
-        </label>
+            <FormControl fullWidth>
+              <InputLabel>期間</InputLabel>
+              <Select
+                label="期間"
+                value={monthKey}
+                onChange={e => setMonthKey(e.target.value as MonthKey)}
+              >
+                <MenuItem value="ALL">全期間</MenuItem>
+                {monthOptions.map(m => (
+                  <MenuItem key={m} value={m}>
+                    {formatMonthJP(m)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <label className="control">
-          <span className="controlLabel">ソート</span>
-          <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}>
-            <option value="date-desc">日付が新しい順</option>
-            <option value="date-asc">日付が古い順</option>
-            <option value="amount-desc">金額が高い順</option>
-            <option value="amount-asc">金額が低い順</option>
-          </select>
-        </label>
-      </div>
+            <FormControl fullWidth>
+              <InputLabel>ソート</InputLabel>
+              <Select
+                label="ソート"
+                value={sortKey}
+                onChange={e => setSortKey(e.target.value as SortKey)}
+              >
+                <MenuItem value="date-desc">日付が新しい順</MenuItem>
+                <MenuItem value="date-asc">日付が古い順</MenuItem>
+                <MenuItem value="amount-desc">金額が高い順</MenuItem>
+                <MenuItem value="amount-asc">金額が低い順</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
 
-      {visibleAccounts.length === 0 ? (
-        <div className="emptyState">データがありません</div>
-      ) : (
-        <ul className="accountsList">
-          {visibleAccounts.map((a, index) => (
-            <li key={getRowKey(a, index)} className="accountRow">
-              {/* 左：種別・日付・カテゴリ */}
-              <div className="rowMain">
-                <div className="rowTop">
-                  <span className={`typeBadge ${a.type === 'EXPENSE' ? 'isExpense' : 'isIncome'}`}>
-                    {a.type === 'EXPENSE' ? '支出' : '収入'}
-                  </span>
-                  <span className="dateText">{a.date}</span>
-                </div>
+          <Divider />
 
-                <div className="rowMid">
-                  <span className="categoryText">{a.category}</span>
-                  {a.memo ? <span className="memoText">メモ: {a.memo}</span> : null}
-                </div>
-              </div>
+          {/* List */}
+          {visibleAccounts.length === 0 ? (
+            <Box sx={{ py: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                データがありません
+              </Typography>
+            </Box>
+          ) : (
+            <List disablePadding>
+              {visibleAccounts.map((a, index) => {
+                const isExpense = a.type === 'EXPENSE'
+                return (
+                  <Box key={getRowKey(a, index)}>
+                    <ListItem
+                      disableGutters
+                      sx={{
+                        py: 1.5,
+                        display: 'flex',
+                        gap: 2,
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      {/* Left */}
+                      <Box sx={{ minWidth: 0 }}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Chip
+                            size="small"
+                            label={isExpense ? '支出' : '収入'}
+                            color={isExpense ? 'error' : 'success'}
+                            variant="outlined"
+                          />
+                          <Typography variant="caption" color="text.secondary">
+                            {a.date}
+                          </Typography>
+                        </Stack>
 
-              {/* 右：金額・アクション */}
-              <div className="rowSide">
-                <div className="amountText">¥{a.amount.toLocaleString()}</div>
-                <div className="actions">
-                  <button type="button" onClick={() => onEdit(a)}>
-                    編集
-                  </button>
-                  <button type="button" onClick={() => onDelete(a)}>
-                    削除
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+                        <Typography variant="subtitle1" sx={{ mt: 0.5 }} noWrap>
+                          {a.category}
+                        </Typography>
+
+                        {a.memo ? (
+                          <Typography variant="body2" color="text.secondary" noWrap>
+                            メモ: {a.memo}
+                          </Typography>
+                        ) : null}
+                      </Box>
+
+                      {/* Right */}
+                      <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+                        <Typography variant="h6">
+                          ¥{a.amount.toLocaleString()}
+                        </Typography>
+
+                        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 0.5 }}>
+                          <Button size="small" variant="outlined" onClick={() => onEdit(a)}>
+                            編集
+                          </Button>
+                          <Button size="small" variant="outlined" color="error" onClick={() => onDelete(a)}>
+                            削除
+                          </Button>
+                        </Stack>
+                      </Box>
+                    </ListItem>
+                    {index !== visibleAccounts.length - 1 ? <Divider /> : null}
+                  </Box>
+                )
+              })}
+            </List>
+          )}
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }

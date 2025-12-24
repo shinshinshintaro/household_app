@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader, Divider, Stack, Typography } from '@mui/material'
 import { ExpensePie } from './Pie/ExpensePie'
 import { IncomePie } from './Pie/IncomePie'
 
@@ -17,18 +18,25 @@ export function PiePanel({
   incomeTotal,
 }: Props) {
   return (
-    <section className="panel">
-      <h2 className="panelTitle">円グラフ（{periodLabel}）</h2>
+    <Card variant="outlined">
+      <CardHeader title={`円グラフ（${periodLabel}）`} />
+      <CardContent>
+        <Stack spacing={2} divider={<Divider flexItem />}>
+          <div>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              支出
+            </Typography>
+            <ExpensePie data={expensePieData} total={expenseTotal} />
+          </div>
 
-      <div className="pieBlock">
-        <h3 className="subTitle">支出</h3>
-        <ExpensePie data={expensePieData} total={expenseTotal} />
-      </div>
-
-      <div className="pieBlock">
-        <h3 className="subTitle">収入</h3>
-        <IncomePie data={incomePieData} total={incomeTotal} />
-      </div>
-    </section>
+          <div>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              収入
+            </Typography>
+            <IncomePie data={incomePieData} total={incomeTotal} />
+          </div>
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }

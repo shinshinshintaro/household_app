@@ -1,4 +1,18 @@
 import type { Dispatch, SetStateAction } from 'react'
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+} from '@mui/material'
 import type { Draft } from '../../types/Draft'
 
 type Props = {
@@ -10,7 +24,6 @@ type Props = {
   onSubmit: () => void
   onCancelEdit: () => void
 
-  // 種別切り替え時に、先頭カテゴリへ戻すために必要
   expenseCategories: readonly string[]
   incomeCategories: readonly string[]
 }
@@ -28,81 +41,99 @@ export function EntryForm({
   incomeCategories,
 }: Props) {
   return (
-    <section className="panel">
-      <h2 className="panelTitle">入力</h2>
+    <Card variant="outlined">
+      <CardHeader
+        title="入力"
+        action={editing ? <Chip color="warning" label="編集モード" /> : null}
+      />
 
-      {/* 編集モードの見える化（事故防止） */}
-      {editing ? <div className="editingBadge">編集モード</div> : null}
+      <CardContent>
+        <Stack spacing={2}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <TextField
+              label="日付"
+              type="date"
+              value={draft.date}
+              onChange={e => setDraft(prev => ({ ...prev, date: e.target.value }))}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
 
-      <div className="formGrid">
-        <label className="field">
-          <span className="fieldLabel">日付</span>
-          <input
-            type="date"
-            value={draft.date}
-            onChange={e => setDraft(prev => ({ ...prev, date: e.target.value }))}
-          />
-        </label>
+            <FormControl fullWidth>
+              <InputLabel>種別</InputLabel>
+              <Select
+                label="種別"
+                value={draft.type}
+                onChange={e => {
+                  const nextType = e.target.value as Draft['type']
+                  const nextCategory =
+                    nextType === 'EXPENSE'
+                      ? expenseCategories[0]
+                      : incomeCategories[0]
+                  setDraft(prev => ({
+                    ...prev,
+                    type: nextType,
+                    category: nextCategory,
+                  }))
+                }}
+              >
+                <MenuItem value="EXPENSE">支出</MenuItem>
+                <MenuItem value="INCOME">収入</MenuItem>
+              </Select>
+            </FormControl>
 
-        <label className="field">
-          <span className="fieldLabel">種別</span>
-          <select
-            value={draft.type}
-            onChange={e => {
-              const nextType = e.target.value as Draft['type']
-              const nextCategory = nextType === 'EXPENSE' ? expenseCategories[0] : incomeCategories[0]
-              setDraft(prev => ({ ...prev, type: nextType, category: nextCategory }))
-            }}
-          >
-            <option value="EXPENSE">支出</option>
-            <option value="INCOME">収入</option>
-          </select>
-        </label>
+            <FormControl fullWidth>
+              <InputLabel>カテゴリ</InputLabel>
+              <Select
+                label="カテゴリ"
+                value={draft.category}
+                onChange={e =>
+                  setDraft(prev => ({ ...prev, category: String(e.target.value) }))
+                }
+              >
+                {categories.map(c => (
+                  <MenuItem key={c} value={c}>
+                    {c}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <label className="field">
-          <span className="fieldLabel">カテゴリ</span>
-          <select
-            value={draft.category}
-            onChange={e => setDraft(prev => ({ ...prev, category: e.target.value }))}
-          >
-            {categories.map(c => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
+            <TextField
+              label="金額"
+              placeholder="例: 1200"
+              inputMode="numeric"
+              value={draft.amount}
+              onChange={e =>
+                setDraft(prev => ({ ...prev, amount: e.target.value }))
+              }
+              fullWidth
+            />
+          </Stack>
 
-        <label className="field">
-          <span className="fieldLabel">金額</span>
-          <input
-            inputMode="numeric"
-            placeholder="例: 1200"
-            value={draft.amount}
-            onChange={e => setDraft(prev => ({ ...prev, amount: e.target.value }))}
-          />
-        </label>
-
-        <label className="field fieldFull">
-          <span className="fieldLabel">備考（{MEMO_MAX}文字以内）</span>
-          <input
+          <TextField
+            label={`備考（${MEMO_MAX}文字以内）`}
             value={draft.memo}
-            onChange={e => setDraft(prev => ({ ...prev, memo: e.target.value }))}
+            onChange={e =>
+              setDraft(prev => ({ ...prev, memo: e.target.value }))
+            }
+            inputProps={{ maxLength: MEMO_MAX }}
+            fullWidth
           />
-        </label>
 
-        <div className="formActions">
-          <button type="button" onClick={onSubmit}>
-            {editing ? '更新' : '追加'}
-          </button>
+          <Stack direction="row" spacing={1}>
+            <Button variant="contained" onClick={onSubmit}>
+              {editing ? '更新' : '追加'}
+            </Button>
 
-          {editing ? (
-            <button type="button" onClick={onCancelEdit}>
-              編集解除
-            </button>
-          ) : null}
-        </div>
-      </div>
-    </section>
+            {editing ? (
+              <Button variant="outlined" onClick={onCancelEdit}>
+                編集解除
+              </Button>
+            ) : null}
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }
