@@ -7,7 +7,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-        return <Home />
+        <Home />
     </ThemeProvider>
   )
 }
