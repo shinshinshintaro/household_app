@@ -2,6 +2,7 @@
   --bg: #f6f7fb;
 }
 
+/* reset-ish */
 * {
   box-sizing: border-box;
 }
@@ -13,7 +14,27 @@ body {
 
 body {
   margin: 0;
-  background: var(--bg);
+
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN",
+    "Yu Gothic",
+    "Meiryo",
+    "Noto Sans JP",
+    Arial,
+    sans-serif;
+
+  
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  background: linear-gradient(180deg, #f6f7fb 0%, #f3f5fb 100%);
 }
 
 /* =========================
@@ -26,6 +47,7 @@ body {
   align-items: start;
 }
 
+/* each column */
 .leftPane,
 .mainPane,
 .rightPane {
@@ -33,6 +55,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* empty state (AccountsPanelでも使用) */
+.emptyState {
+  border-radius: 12px;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 /* =========================
@@ -43,7 +72,13 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .leftPane { order: 1; }
-  .mainPane { order: 2; }
-  .rightPane { order: 3; }
+  .leftPane {
+    order: 1;
+  }
+  .mainPane {
+    order: 2;
+  }
+  .rightPane {
+    order: 3;
+  }
 }
