@@ -1,7 +1,13 @@
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
 import { Home } from './pages/Home'
 
-function App() {
-  return <Home />
-}
+const theme = createTheme({})
 
-export default App
+export default function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+        return <Home />
+    </ThemeProvider>
+  )
+}

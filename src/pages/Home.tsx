@@ -5,10 +5,9 @@ import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories'
 import { useAccounts } from '../hooks/useAccounts'
 import { useFilters } from '../hooks/useFilters'
 import * as S from '../selectors/accountSelectors'
-import { EntryForm } from '../features/dashboard/EntryForm'
-import { AccountsPanel } from '../features/dashboard/AccountsPanel'
+import * as index from '../features/dashboard/Index'
 import { PiePanel } from '../features/PiePanel'
-import { MonthlySummaryCard } from '../features/dashboard/MonthlySummary'
+import { Container, Stack, Typography } from '@mui/material'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = 'household-app-data'
@@ -91,15 +90,16 @@ export const Home = () => {
   const modeLabel = viewMode === 'BALANCE' ? '収支' : viewMode === 'INCOME' ? '収入' : '支出'
 
   return (
-    <div className="homeLayout">
-      <header className="homeHeader">
-        <h1 className="appTitle">家計簿アプリ</h1>
-      </header>
+    <Container maxWidth="md" sx={{ py: 3 }}>
+      <Stack spacing={2}>
+        <Typography variant="h5" fontWeight={700}>
+          家計簿アプリ
+        </Typography>
 
       <div className="homeGrid">
         {/* 左：月次 */}
         <aside className="leftPane">
-          <MonthlySummaryCard
+          <index.MonthlySummaryCard
             titleMonthKey={summaryMonthKey}
             monthly={monthly}
             income={summaryTotals.income}
@@ -110,7 +110,7 @@ export const Home = () => {
 
         {/* 中央：入力 と 一覧 */}
         <main className="mainPane">
-          <EntryForm
+          <index.EntryForm
             draft={draft}
             setDraft={setDraft}
             categories={categories}
@@ -124,7 +124,7 @@ export const Home = () => {
             incomeCategories={INCOME_CATEGORIES}
           />
 
-          <AccountsPanel
+          <index.AccountsPanel
             modeLabel={modeLabel}
             periodLabel={periodLabel}
             viewMode={viewMode}
@@ -151,7 +151,7 @@ export const Home = () => {
           />
         </aside>
       </div>
-
-    </div>
+      </Stack>
+    </Container>
   )
 }
