@@ -36,7 +36,7 @@ body {
 
 /* ✅ 画面全体幅を少し広げる（中央が狭くならないように） */
 .container {
-  max-width: 1320px;
+  max-width: 1500px;
   margin: 24px auto;
   padding: 0 16px;
 }
