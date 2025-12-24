@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Account } from '../types/Account'
+import type { Draft } from '../types/Draft'
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories'
 import { useAccounts } from '../hooks/useAccounts'
 import { useFilters } from '../hooks/useFilters'
 import * as S from '../selectors/accountSelectors'
@@ -7,17 +9,6 @@ import { EntryForm } from '../components/home/EntryForm'
 import { AccountsPanel } from '../components/home/AccountsPanel'
 import { PiePanel } from '../components/PiePanel'
 import { MonthlySummaryCard } from '../components/home/MonthlySummary'
-
-type Draft = {
-  date: string
-  type: 'INCOME' | 'EXPENSE'
-  category: string
-  amount: string
-  memo: string
-}
-
-const EXPENSE_CATEGORIES = ['食費', '家賃', '光熱費', '通信費', '交通費', '日用品', '娯楽', 'その他'] as const
-const INCOME_CATEGORIES = ['給料', '副業', '給付金', '配当', 'その他'] as const
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = 'household-app-data'
@@ -34,22 +25,27 @@ export const Home = () => {
   })
 
   const { viewMode, setViewMode, monthKey, setMonthKey, sortKey, setSortKey } = useFilters(draft.date)
+
   const [editingId, setEditingId] = useState<number | null>(null)
 
+  // 種別に応じたカテゴリ候補
   const categories = draft.type === 'EXPENSE' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
 
+  // 月プルダウン候補
   const monthOptions = useMemo(() => S.selectMonthOptions(accounts, draft.date), [accounts, draft.date])
+
+  // 一覧用（期間→モード→ソート）
   const accountsByPeriod = useMemo(() => S.selectAccountsByPeriod(accounts, monthKey), [accounts, monthKey])
   const accountsByMode = useMemo(() => S.selectAccountsByMode(accountsByPeriod, viewMode), [accountsByPeriod, viewMode])
   const visibleAccounts = useMemo(() => S.selectVisibleAccounts(accountsByMode, sortKey), [accountsByMode, sortKey])
 
+  // 円グラフ用
   const expensePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'EXPENSE'), [accountsByPeriod])
   const expenseTotal = useMemo(() => S.selectTotalFromPie(expensePieData), [expensePieData])
-
   const incomePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'INCOME'), [accountsByPeriod])
   const incomeTotal = useMemo(() => S.selectTotalFromPie(incomePieData), [incomePieData])
 
-  // 月次サマリ用（ALLなら最新月）
+  // 月次サマリ用：ALLのときは最新月で表示
   const latestMonthKey = useMemo(() => S.selectLatestMonthKey(accounts, draft.date), [accounts, draft.date])
   const summaryMonthKey = monthKey === 'ALL' ? latestMonthKey : monthKey
 
@@ -57,7 +53,6 @@ export const Home = () => {
     () => S.selectAccountsByPeriod(accounts, summaryMonthKey),
     [accounts, summaryMonthKey],
   )
-
   const summaryTotals = useMemo(() => S.selectTotals(accountsForSummaryMonth), [accountsForSummaryMonth])
   const monthly = useMemo(() => S.selectMonthlyBalances(accounts), [accounts])
 
@@ -69,6 +64,7 @@ export const Home = () => {
       onResetDraft()
       return
     }
+
     updateAccount(editingId, draft)
     setEditingId(null)
     onResetDraft()
@@ -80,6 +76,7 @@ export const Home = () => {
       alert('この行はidが無いので編集できません（古いデータの可能性）')
       return
     }
+
     setEditingId(id)
     setDraft({
       date: a.date,
@@ -94,24 +91,14 @@ export const Home = () => {
   const modeLabel = viewMode === 'BALANCE' ? '収支' : viewMode === 'INCOME' ? '収入' : '支出'
 
   return (
-    <div className="container">
-      {/* ✅ ① タイトル中央 */}
-      <h1 className="title titleCenter">家計簿アプリ</h1>
+    <div className="homeLayout">
+      <header className="homeHeader">
+        <h1 className="appTitle">家計簿アプリ</h1>
+      </header>
 
-      <div className="layout">
-        {/* ✅ 左：被らないように sidebar に隔離 */}
-        <div className="sidebar">
-          <MonthlySummaryCard
-            titleMonthKey={summaryMonthKey}
-            monthly={monthly}
-            income={summaryTotals.income}
-            expense={summaryTotals.expense}
-            balance={summaryTotals.balance}
-          />
-        </div>
-
-        {/* ✅ 中央：main */}
-        <div className="main">
+      <div className="homeGrid">
+        {/* 左：入力 */}
+        <aside className="leftPane">
           <EntryForm
             draft={draft}
             setDraft={setDraft}
@@ -126,6 +113,17 @@ export const Home = () => {
             incomeCategories={INCOME_CATEGORIES}
           />
 
+          <MonthlySummaryCard
+            titleMonthKey={summaryMonthKey}
+            monthly={monthly}
+            income={summaryTotals.income}
+            expense={summaryTotals.expense}
+            balance={summaryTotals.balance}
+          />
+        </aside>
+
+        {/* 中央：一覧 */}
+        <main className="mainPane">
           <AccountsPanel
             modeLabel={modeLabel}
             periodLabel={periodLabel}
@@ -140,10 +138,10 @@ export const Home = () => {
             onEdit={onEdit}
             onDelete={deleteAccount}
           />
-        </div>
+        </main>
 
-        {/* ✅ 右：円グラフ */}
-        <div className="right">
+        {/* 右：円グラフ */}
+        <aside className="rightPane">
           <PiePanel
             periodLabel={periodLabel}
             expensePieData={expensePieData}
@@ -151,7 +149,7 @@ export const Home = () => {
             incomePieData={incomePieData}
             incomeTotal={incomeTotal}
           />
-        </div>
+        </aside>
       </div>
     </div>
   )

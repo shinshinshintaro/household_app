@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 type Props = {
   data: { name: string; value: number }[]
@@ -22,36 +22,39 @@ export const ExpensePie = ({ data, total }: Props) => {
 
   const activeValue = useMemo(() => {
     if (!activeCategory) return null
-    const found = data.find(d => d.name === activeCategory)
-    return found ? found.value : null
+    return data.find(d => d.name === activeCategory)?.value ?? null
   }, [data, activeCategory])
 
   if (data.length === 0) {
-    return <p className="subText">今月の支出データがありません</p>
+    return <div className="emptyState">この期間の支出データがありません</div>
   }
 
-  return (
-    <div>
-      {/* 上：合計 or 選択カテゴリ合計 */}
-      <div className="pieHeader">
-        <div className="pieHeaderTitle">{activeCategory ? `選択中：${activeCategory}` : '合計'}</div>
-        <div className="pieHeaderValue">¥{(activeCategory ? (activeValue ?? 0) : total).toLocaleString()}</div>
+  const shownTotal = activeCategory ? activeValue ?? 0 : total
 
-        {activeCategory && (
-          <button className="chip" onClick={() => setActiveCategory(null)}>
+  return (
+    <div className="pieWrap">
+      {/* 上：合計表示（フィルタ中はそのカテゴリの合計） */}
+      <div className="pieHeader">
+        <div className="pieTitle">{activeCategory ? `選択中：${activeCategory}` : '合計'}</div>
+        <div className="pieTotal">¥{shownTotal.toLocaleString()}</div>
+
+        {activeCategory ? (
+          <button type="button" className="miniBtn" onClick={() => setActiveCategory(null)}>
             フィルタ解除
           </button>
-        )}
+        ) : null}
       </div>
 
-      <div style={{ width: 260, height: 260, margin: '0 auto' }}>
-        <ResponsiveContainer>
+      <div className="pieChart">
+        <ResponsiveContainer width="100%" height={180}>
           <PieChart>
+            <Tooltip formatter={(v: unknown) => `¥${Number(v).toLocaleString()}`} />
             <Pie
               data={data}
               dataKey="value"
               nameKey="name"
-              outerRadius={100}
+              innerRadius={45}
+              outerRadius={70}
               onClick={(_, idx) => {
                 const clicked = data[idx]
                 if (!clicked) return
@@ -63,37 +66,34 @@ export const ExpensePie = ({ data, total }: Props) => {
                 return (
                   <Cell
                     key={entry.name}
-                    fill={CATEGORY_COLORS[entry.name] ?? '#9ca3af'}
-                    opacity={isDim ? 0.25 : 1}
+                    fill={CATEGORY_COLORS[entry.name] ?? '#8884d8'}
+                    opacity={isDim ? 0.3 : 1}
                   />
                 )
               })}
             </Pie>
-            <Tooltip />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      {/* 下：凡例 */}
-      <div className="pieLegend">
+      {/* 下：凡例（ここもクリックで絞れる） */}
+      <ul className="pieLegend">
         {data.map(d => {
           const isActive = activeCategory === d.name
           return (
-            <button
-              type="button"
-              key={d.name}
-              className={`legendRowButton ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveCategory(prev => (prev === d.name ? null : d.name))}
-            >
-              <span className="legendLeft">
-                <span className="legendColor" style={{ backgroundColor: CATEGORY_COLORS[d.name] ?? '#9ca3af' }} />
+            <li key={d.name}>
+              <button
+                type="button"
+                className={`legendBtn ${isActive ? 'isActive' : ''}`}
+                onClick={() => setActiveCategory(prev => (prev === d.name ? null : d.name))}
+              >
                 <span className="legendName">{d.name}</span>
-              </span>
-              <span className="legendValue">¥{d.value.toLocaleString()}</span>
-            </button>
+                <span className="legendValue">¥{d.value.toLocaleString()}</span>
+              </button>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
 }

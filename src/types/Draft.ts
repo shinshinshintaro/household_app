@@ -1,6 +1,8 @@
+import type { AccountType } from './Account'
+
 export type Draft = {
   date: string
-  type: 'INCOME' | 'EXPENSE'
+  type: AccountType
   category: string
   amount: string
   memo: string

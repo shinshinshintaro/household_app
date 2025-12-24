@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
   CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
-  Legend,
+  XAxis,
+  YAxis,
 } from 'recharts'
 import type { MonthlyBalancePoint } from '../../selectors/accountSelectors'
 import { formatMonthJP } from '../../selectors/accountSelectors'
@@ -29,64 +29,56 @@ export const MonthlySummaryCard = ({
   expense,
   balance,
 }: Props) => {
+  // 収支の色はCSS側に寄せる（人間が直しやすい）
   const balanceClass = balance >= 0 ? 'summaryGreen' : 'summaryRed'
 
-  const chartData = useMemo(() => {
-    return monthly.map(m => ({
-      month: formatMonthJP(m.monthKey),
-      balance: m.balance,
-    }))
-  }, [monthly])
+  // recharts用に表示文字列だけ整形
+  const chartData = useMemo(
+    () =>
+      monthly.map(m => ({
+        month: formatMonthJP(m.monthKey),
+        balance: m.balance,
+      })),
+    [monthly],
+  )
 
   return (
-    <div className="card">
-      <h2>月次サマリ</h2>
+    <section className="panel">
+      <h2 className="panelTitle">月次サマリ</h2>
 
-      <div className="subText" style={{ marginBottom: 8 }}>
-        最新月（{formatMonthJP(titleMonthKey)}）の収支
+      {/* 最新月の集計（ALL表示でも、ここは「最新月」を渡す運用） */}
+      <div className="summaryBlock">
+        <div className="summaryTitle">最新月（{formatMonthJP(titleMonthKey)}）の収支</div>
+
+        <div className="summaryRow">
+          <span className="summaryLabel">収入</span>
+          <span className="summaryValue">{yen(income)}</span>
+        </div>
+
+        <div className="summaryRow">
+          <span className="summaryLabel">支出</span>
+          <span className="summaryValue">{yen(expense)}</span>
+        </div>
+
+        <div className="summaryRow">
+          <span className="summaryLabel">収支</span>
+          <span className={`summaryValue ${balanceClass}`}>{yen(balance)}</span>
+        </div>
       </div>
 
-      {/* ②：一覧側から移設（色・フォントはクラスで維持） */}
-      <div className="summaryRow" style={{ marginBottom: 10 }}>
-        <span className="summaryItem summaryGreen">
-          収入：<b>{yen(income)}</b>
-        </span>
-        <br />
-        <span className="summaryItem summaryRed">
-          支出：<b>{yen(expense)}</b>
-        </span>
-        <br />
-        <span className={`summaryItem ${balanceClass}`}>
-          収支：<b>{yen(balance)}</b>
-        </span>
-        <br />
-        <br />
-      </div>
-
-      {/* ③④⑤：¥付き・折れ線・細め・鮮やか・凡例に「収支表」 */}
-      <div style={{ width: '100%', height: 220 }}>
-        <ResponsiveContainer>
-          <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+      {/* 折れ線グラフ（全期間ベース） */}
+      <div className="chartWrap">
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              tickFormatter={(v: number) => `¥${Number(v).toLocaleString()}`} // ③
-            />
-            <Tooltip formatter={(v: any) => yen(Number(v))} />
+            <XAxis dataKey="month" />
+            <YAxis tickFormatter={(v: number) => yen(Number(v))} />
+            <Tooltip formatter={(v: unknown) => yen(Number(v))} />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="balance"
-              name="収支表" // ⑤
-              stroke="#2563eb" // ④（鮮やか）
-              strokeWidth={2} // ④（太すぎ防止）
-              dot={{ r: 2 }}
-              activeDot={{ r: 5 }}
-            />
+            <Line type="monotone" dataKey="balance" name="収支" dot={false} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </section>
   )
 }

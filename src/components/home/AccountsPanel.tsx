@@ -17,7 +17,6 @@ type Props = {
 
   monthOptions: string[]
   visibleAccounts: Account[]
-
   onEdit: (a: Account) => void
   onDelete: (a: Account) => void
 }
@@ -37,23 +36,25 @@ export const AccountsPanel = ({
   onDelete,
 }: Props) => {
   return (
-    <div className="card">
-      <div className="listHeader">
-        <div className="listHeaderLeft">
-          <h2>
-            家計簿一覧（{modeLabel} / {periodLabel}）
-          </h2>
-          
-        </div>
+    <section className="panel">
+      <h2 className="panelTitle">
+        家計簿一覧（{modeLabel} / {periodLabel}）
+      </h2>
 
-        <div className="controls">
-          <select className="controlSelect" value={viewMode} onChange={e => setViewMode(e.target.value as ViewMode)}>
+      {/* フィルタ類は「上に固める」ほうが見通し良い */}
+      <div className="controlsRow">
+        <label className="control">
+          <span className="controlLabel">表示</span>
+          <select value={viewMode} onChange={e => setViewMode(e.target.value as ViewMode)}>
             <option value="BALANCE">収支</option>
             <option value="INCOME">収入</option>
             <option value="EXPENSE">支出</option>
           </select>
+        </label>
 
-          <select className="controlSelect" value={monthKey} onChange={e => setMonthKey(e.target.value as MonthKey)}>
+        <label className="control">
+          <span className="controlLabel">期間</span>
+          <select value={monthKey} onChange={e => setMonthKey(e.target.value as MonthKey)}>
             <option value="ALL">全期間</option>
             {monthOptions.map(m => (
               <option key={m} value={m}>
@@ -61,60 +62,56 @@ export const AccountsPanel = ({
               </option>
             ))}
           </select>
+        </label>
 
-          <select className="controlSelect" value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}>
+        <label className="control">
+          <span className="controlLabel">ソート</span>
+          <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}>
             <option value="date-desc">日付が新しい順</option>
             <option value="date-asc">日付が古い順</option>
             <option value="amount-desc">金額が高い順</option>
             <option value="amount-asc">金額が低い順</option>
           </select>
-        </div>
+        </label>
       </div>
 
       {visibleAccounts.length === 0 ? (
-        <p className="subText">データがありません</p>
+        <div className="emptyState">データがありません</div>
       ) : (
-        <div className='accountsListWrap'>
-          <ul className="list">
+        <ul className="accountsList">
           {visibleAccounts.map((a, index) => (
-            <li key={getRowKey(a, index)} className="row rowGrid">
-              {/* 種別 */}
-              <div className="colType">
-                <span className={`badge ${a.type === 'EXPENSE' ? 'badgeExpense' : 'badgeIncome'}`}>
-                  {a.type === 'EXPENSE' ? '支出' : '収入'}
-                </span>
+            <li key={getRowKey(a, index)} className="accountRow">
+              {/* 左：種別・日付・カテゴリ */}
+              <div className="rowMain">
+                <div className="rowTop">
+                  <span className={`typeBadge ${a.type === 'EXPENSE' ? 'isExpense' : 'isIncome'}`}>
+                    {a.type === 'EXPENSE' ? '支出' : '収入'}
+                  </span>
+                  <span className="dateText">{a.date}</span>
+                </div>
+
+                <div className="rowMid">
+                  <span className="categoryText">{a.category}</span>
+                  {a.memo ? <span className="memoText">メモ: {a.memo}</span> : null}
+                </div>
               </div>
 
-              {/* 日付 */}
-              <div className="colDate">{a.date}</div>
-
-              {/* カテゴリ */}
-              <div className="colCategory">
-                <span className="rowCategory">{a.category}</span>
-              </div>
-
-              {/* 備考（カテゴリ右・金額左） */}
-              <div className="colMemo" title={a.memo ?? ''}>
-                {a.memo ? `メモ: ${a.memo}` : ''}
-              </div>
-
-              {/* 金額 */}
-              <div className="colAmount">¥{a.amount.toLocaleString()}</div>
-
-              {/* アクション */}
-              <div className="colActions">
-                <button className="miniBtn" onClick={() => onEdit(a)}>
-                  編集
-                </button>
-                <button className="miniBtn miniBtnDanger" onClick={() => onDelete(a)}>
-                  削除
-                </button>
+              {/* 右：金額・アクション */}
+              <div className="rowSide">
+                <div className="amountText">¥{a.amount.toLocaleString()}</div>
+                <div className="actions">
+                  <button type="button" onClick={() => onEdit(a)}>
+                    編集
+                  </button>
+                  <button type="button" onClick={() => onDelete(a)}>
+                    削除
+                  </button>
+                </div>
               </div>
             </li>
           ))}
         </ul>
-        </div>
       )}
-    </div>
+    </section>
   )
 }

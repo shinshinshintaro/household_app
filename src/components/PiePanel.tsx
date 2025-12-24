@@ -17,20 +17,18 @@ export function PiePanel({
   incomeTotal,
 }: Props) {
   return (
-    <>
-      <div className="card">
-        <h2 style={{ margin: 0, fontSize: 18 }}>支出の円グラフ（{periodLabel}）</h2>
-        <div className="pieWrap">
-          <ExpensePie data={expensePieData} total={expenseTotal} />
-        </div>
+    <section className="panel">
+      <h2 className="panelTitle">円グラフ（{periodLabel}）</h2>
+
+      <div className="pieBlock">
+        <h3 className="subTitle">支出</h3>
+        <ExpensePie data={expensePieData} total={expenseTotal} />
       </div>
 
-      <div className="card">
-        <h2 style={{ margin: 0, fontSize: 18 }}>収入の円グラフ（{periodLabel}）</h2>
-        <div className="pieWrap">
-          <IncomePie data={incomePieData} total={incomeTotal} />
-        </div>
+      <div className="pieBlock">
+        <h3 className="subTitle">収入</h3>
+        <IncomePie data={incomePieData} total={incomeTotal} />
       </div>
-    </>
+    </section>
   )
 }

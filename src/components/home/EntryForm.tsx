@@ -1,20 +1,16 @@
 import type { Dispatch, SetStateAction } from 'react'
-
-type Draft = {
-  date: string
-  type: 'INCOME' | 'EXPENSE'
-  category: string
-  amount: string
-  memo: string
-}
+import type { Draft } from '../../types/Draft'
 
 type Props = {
   draft: Draft
   setDraft: Dispatch<SetStateAction<Draft>>
   categories: readonly string[]
+
   editing: boolean
   onSubmit: () => void
   onCancelEdit: () => void
+
+  // 種別切り替え時に、先頭カテゴリへ戻すために必要
   expenseCategories: readonly string[]
   incomeCategories: readonly string[]
 }
@@ -32,27 +28,25 @@ export function EntryForm({
   incomeCategories,
 }: Props) {
   return (
-    <div className="card">
-      <div className="cardHeader">
-        <h2>入力</h2>
-        {editing && <span className="editBadge">編集中</span>}
-      </div>
+    <section className="panel">
+      <h2 className="panelTitle">入力</h2>
 
-      <div className="formRow">
-        <div className="field">
-          <label>日付</label>
+      {/* 編集モードの見える化（事故防止） */}
+      {editing ? <div className="editingBadge">編集モード</div> : null}
+
+      <div className="formGrid">
+        <label className="field">
+          <span className="fieldLabel">日付</span>
           <input
-            className="input"
             type="date"
             value={draft.date}
             onChange={e => setDraft(prev => ({ ...prev, date: e.target.value }))}
           />
-        </div>
+        </label>
 
-        <div className="field">
-          <label>種別</label>
+        <label className="field">
+          <span className="fieldLabel">種別</span>
           <select
-            className="input"
             value={draft.type}
             onChange={e => {
               const nextType = e.target.value as Draft['type']
@@ -63,12 +57,11 @@ export function EntryForm({
             <option value="EXPENSE">支出</option>
             <option value="INCOME">収入</option>
           </select>
-        </div>
+        </label>
 
-        <div className="field">
-          <label>カテゴリ</label>
+        <label className="field">
+          <span className="fieldLabel">カテゴリ</span>
           <select
-            className="input"
             value={draft.category}
             onChange={e => setDraft(prev => ({ ...prev, category: e.target.value }))}
           >
@@ -78,38 +71,38 @@ export function EntryForm({
               </option>
             ))}
           </select>
-        </div>
+        </label>
 
-        <div className="field">
-          <label>金額</label>
+        <label className="field">
+          <span className="fieldLabel">金額</span>
           <input
-            className="input inputShort"
             inputMode="numeric"
+            placeholder="例: 1200"
             value={draft.amount}
             onChange={e => setDraft(prev => ({ ...prev, amount: e.target.value }))}
           />
-        </div>
+        </label>
 
-        <div className="field fieldMemo">
-          <label>備考（{MEMO_MAX}文字以内）</label>
+        <label className="field fieldFull">
+          <span className="fieldLabel">備考（{MEMO_MAX}文字以内）</span>
           <input
-            className="input inputMemo"
             value={draft.memo}
-            maxLength={MEMO_MAX}
             onChange={e => setDraft(prev => ({ ...prev, memo: e.target.value }))}
           />
-        </div>
+        </label>
 
-        <button className="button" onClick={onSubmit}>
-          {editing ? '更新' : '追加'}
-        </button>
-
-        {editing && (
-          <button className="button buttonGhost" onClick={onCancelEdit}>
-            編集解除
+        <div className="formActions">
+          <button type="button" onClick={onSubmit}>
+            {editing ? '更新' : '追加'}
           </button>
-        )}
+
+          {editing ? (
+            <button type="button" onClick={onCancelEdit}>
+              編集解除
+            </button>
+          ) : null}
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
