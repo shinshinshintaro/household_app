@@ -10,9 +10,17 @@ type Props = {
   incomeTotal: number
 }
 
+export const hoverLift = {
+  transition: 'transform 160ms ease, box-shadow 160ms ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: 6,
+  },
+}
+
 export function PiePanel({ periodLabel, expensePieData, expenseTotal, incomePieData, incomeTotal }: Props) {
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={hoverLift}>
       <CardHeader title={`円グラフ（${periodLabel}）`} />
 
       <CardContent>

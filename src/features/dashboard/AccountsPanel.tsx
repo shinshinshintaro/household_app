@@ -38,6 +38,14 @@ type Props = {
   onDelete: (a: Account) => void
 }
 
+export const hoverLift = {
+  transition: 'transform 160ms ease, box-shadow 160ms ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: 6,
+  },
+}
+
 export const AccountsPanel = ({
   modeLabel,
   periodLabel,
@@ -53,7 +61,7 @@ export const AccountsPanel = ({
   onDelete,
 }: Props) => {
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={hoverLift}>
       <CardHeader title={`家計簿一覧（${modeLabel} / ${periodLabel}）`} />
 
       <CardContent>

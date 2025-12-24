@@ -22,6 +22,13 @@ type Props = {
 }
 
 const yen = (n: number) => `¥${n.toLocaleString()}`
+export const hoverLift = {
+  transition: 'transform 160ms ease, box-shadow 160ms ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: 6,
+  },
+}
 
 export const MonthlySummaryCard = ({
   titleMonthKey,
@@ -40,7 +47,7 @@ export const MonthlySummaryCard = ({
   )
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={hoverLift}>
       <CardHeader title="月次サマリ" />
 
       <CardContent>

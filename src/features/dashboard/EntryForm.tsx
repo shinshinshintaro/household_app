@@ -30,6 +30,14 @@ type Props = {
 
 const MEMO_MAX = 10
 
+export const hoverLift = {
+  transition: 'transform 160ms ease, box-shadow 160ms ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: 6,
+  },
+}
+
 export function EntryForm({
   draft,
   setDraft,
@@ -41,7 +49,7 @@ export function EntryForm({
   incomeCategories,
 }: Props) {
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={hoverLift}>
       <CardHeader
         title="入力"
         action={editing ? <Chip color="warning" label="編集モード" /> : null}

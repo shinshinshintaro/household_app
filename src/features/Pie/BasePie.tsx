@@ -79,6 +79,7 @@ export function BasePie({ emptyText, data, total, colors }: Props) {
               innerRadius={55}
               outerRadius={85}
               paddingAngle={2}
+              minAngle={5}
               onClick={(_, idx) => {
                 const clicked = data[idx]
                 if (!clicked) return

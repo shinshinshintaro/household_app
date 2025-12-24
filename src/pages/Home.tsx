@@ -7,10 +7,17 @@ import { useFilters } from '../hooks/useFilters'
 import * as S from '../selectors/accountSelectors'
 import * as index from '../features/dashboard/Index'
 import { PiePanel } from '../features/PiePanel'
-import { Container, Stack, Typography, Box } from '@mui/material'
+import { Container, Stack, Typography, Box, Snackbar, Alert } from '@mui/material'
+import { FadeIn } from '../components/FadeIn'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = 'household-app-data'
+
+type SnackState = {
+  open: boolean
+  message: string
+  severity: 'success' | 'info' | 'warning' | 'error'
+}
 
 export const Home = () => {
   const { accounts, addAccount, updateAccount, deleteAccount } = useAccounts(STORAGE_KEY)
@@ -26,19 +33,36 @@ export const Home = () => {
   const { viewMode, setViewMode, monthKey, setMonthKey, sortKey, setSortKey } = useFilters(draft.date)
   const [editingId, setEditingId] = useState<number | null>(null)
 
+  // ✅ Snackbar
+  const [snack, setSnack] = useState<SnackState>({
+    open: false,
+    message: '',
+    severity: 'success',
+  })
+
+  const showSnack = (message: string, severity: SnackState['severity'] = 'success') => {
+    setSnack({ open: true, message, severity })
+  }
+  const closeSnack = () => setSnack(prev => ({ ...prev, open: false }))
+
+  // 種別に応じたカテゴリ候補
   const categories = draft.type === 'EXPENSE' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
 
+  // 月プルダウン候補
   const monthOptions = useMemo(() => S.selectMonthOptions(accounts, draft.date), [accounts, draft.date])
 
+  // 一覧用（期間→モード→ソート）
   const accountsByPeriod = useMemo(() => S.selectAccountsByPeriod(accounts, monthKey), [accounts, monthKey])
   const accountsByMode = useMemo(() => S.selectAccountsByMode(accountsByPeriod, viewMode), [accountsByPeriod, viewMode])
   const visibleAccounts = useMemo(() => S.selectVisibleAccounts(accountsByMode, sortKey), [accountsByMode, sortKey])
 
+  // 円グラフ用
   const expensePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'EXPENSE'), [accountsByPeriod])
   const expenseTotal = useMemo(() => S.selectTotalFromPie(expensePieData), [expensePieData])
   const incomePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'INCOME'), [accountsByPeriod])
   const incomeTotal = useMemo(() => S.selectTotalFromPie(incomePieData), [incomePieData])
 
+  // 月次サマリ用：ALLのときは最新月で表示
   const latestMonthKey = useMemo(() => S.selectLatestMonthKey(accounts, draft.date), [accounts, draft.date])
   const summaryMonthKey = monthKey === 'ALL' ? latestMonthKey : monthKey
 
@@ -54,11 +78,14 @@ export const Home = () => {
   const onAddOrUpdate = () => {
     if (editingId === null) {
       addAccount(draft)
+      showSnack('追加しました', 'success')
       onResetDraft()
       return
     }
+
     updateAccount(editingId, draft)
     setEditingId(null)
+    showSnack('更新しました', 'success')
     onResetDraft()
   }
 
@@ -68,6 +95,7 @@ export const Home = () => {
       alert('この行はidが無いので編集できません（古いデータの可能性）')
       return
     }
+
     setEditingId(id)
     setDraft({
       date: a.date,
@@ -76,75 +104,105 @@ export const Home = () => {
       amount: String(a.amount),
       memo: a.memo ?? '',
     })
+    showSnack('編集モードにしました', 'info')
+  }
+
+  const onDelete = (a: Account) => {
+    deleteAccount(a)
+    // 編集中の行を消した場合の安全処理
+    const id = S.getSafeId(a)
+    if (id !== null && editingId === id) {
+      setEditingId(null)
+      onResetDraft()
+    }
+    showSnack('削除しました', 'warning')
   }
 
   const periodLabel = monthKey === 'ALL' ? '全期間' : S.formatMonthJP(monthKey)
   const modeLabel = viewMode === 'BALANCE' ? '収支' : viewMode === 'INCOME' ? '収入' : '支出'
 
   return (
-    <Container
-      maxWidth={false}
-      sx={{ py: 3, maxWidth: 1500, mx: 'auto' }}
-    >
+    <Container maxWidth={false} sx={{ py: 3, maxWidth: 1500, mx: 'auto' }}>
       <Stack spacing={2}>
         <Typography variant="h5" fontWeight={700} textAlign="center">
-          家計簿アプリ
+          <FadeIn delay={500}>家計簿アプリ</FadeIn>
         </Typography>
 
         {/* CSSの3カラムグリッドをそのまま使う */}
         <Box className="homeGrid">
           <aside className="leftPane">
-            <index.MonthlySummaryCard
-              titleMonthKey={summaryMonthKey}
-              monthly={monthly}
-              income={summaryTotals.income}
-              expense={summaryTotals.expense}
-              balance={summaryTotals.balance}
-            />
+            <FadeIn delay={1500}>
+              <index.MonthlySummaryCard
+                titleMonthKey={summaryMonthKey}
+                monthly={monthly}
+                income={summaryTotals.income}
+                expense={summaryTotals.expense}
+                balance={summaryTotals.balance}
+              />
+            </FadeIn>
           </aside>
 
           <main className="mainPane">
-            <index.EntryForm
-              draft={draft}
-              setDraft={setDraft}
-              categories={categories}
-              editing={editingId !== null}
-              onSubmit={onAddOrUpdate}
-              onCancelEdit={() => {
-                setEditingId(null)
-                onResetDraft()
-              }}
-              expenseCategories={EXPENSE_CATEGORIES}
-              incomeCategories={INCOME_CATEGORIES}
-            />
+            <FadeIn delay={1000}>
+              <index.EntryForm
+                draft={draft}
+                setDraft={setDraft}
+                categories={categories}
+                editing={editingId !== null}
+                onSubmit={onAddOrUpdate}
+                onCancelEdit={() => {
+                  setEditingId(null)
+                  onResetDraft()
+                  showSnack('編集解除しました', 'info')
+                }}
+                expenseCategories={EXPENSE_CATEGORIES}
+                incomeCategories={INCOME_CATEGORIES}
+              />
+            </FadeIn>
 
-            <index.AccountsPanel
-              modeLabel={modeLabel}
-              periodLabel={periodLabel}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              monthKey={monthKey}
-              setMonthKey={setMonthKey}
-              sortKey={sortKey}
-              setSortKey={setSortKey}
-              monthOptions={monthOptions}
-              visibleAccounts={visibleAccounts}
-              onEdit={onEdit}
-              onDelete={deleteAccount}
-            />
+            <FadeIn delay={1000}>
+              <index.AccountsPanel
+                modeLabel={modeLabel}
+                periodLabel={periodLabel}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                monthKey={monthKey}
+                setMonthKey={setMonthKey}
+                sortKey={sortKey}
+                setSortKey={setSortKey}
+                monthOptions={monthOptions}
+                visibleAccounts={visibleAccounts}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            </FadeIn>
           </main>
 
           <aside className="rightPane">
-            <PiePanel
-              periodLabel={periodLabel}
-              expensePieData={expensePieData}
-              expenseTotal={expenseTotal}
-              incomePieData={incomePieData}
-              incomeTotal={incomeTotal}
-            />
+            <FadeIn delay={1500}>
+              <PiePanel
+                periodLabel={periodLabel}
+                expensePieData={expensePieData}
+                expenseTotal={expenseTotal}
+                incomePieData={incomePieData}
+                incomeTotal={incomeTotal}
+              />
+            </FadeIn>
           </aside>
         </Box>
       </Stack>
+
+      {/* ✅ Snackbar（③） */}
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={2200}
+        onClose={closeSnack}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={closeSnack} severity={snack.severity} variant="filled" sx={{ width: '100%' }}>
+          {snack.message}
+        </Alert>
+      </Snackbar>
     </Container>
   )
 }
