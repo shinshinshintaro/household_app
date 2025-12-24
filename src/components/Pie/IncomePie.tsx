@@ -13,10 +13,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   その他: '#6b7280',
 }
 
-export const IncomePie = ({ data, total }: Props) => {
+export function IncomePie({ data, total }: Props) {
   return (
     <BasePie
-      emptyText="今月の収入データがありません"
+      emptyText="この期間の収入データがありません"
       data={data}
       total={total}
       colors={CATEGORY_COLORS}
