@@ -48,7 +48,7 @@ export const MonthlySummaryCard = ({
 
       {/* 最新月の集計（ALL表示でも、ここは「最新月」を渡す運用） */}
       <div className="summaryBlock">
-        <div className="summaryTitle">最新月（{formatMonthJP(titleMonthKey)}）の収支</div>
+        <div className="summaryTitle">{formatMonthJP(titleMonthKey)}の収支</div>
 
         <div className="summaryRow">
           <span className="summaryLabel">収入</span>

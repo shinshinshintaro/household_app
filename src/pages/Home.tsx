@@ -97,8 +97,19 @@ export const Home = () => {
       </header>
 
       <div className="homeGrid">
-        {/* 左：入力 */}
+        {/* 左：月次 */}
         <aside className="leftPane">
+          <MonthlySummaryCard
+            titleMonthKey={summaryMonthKey}
+            monthly={monthly}
+            income={summaryTotals.income}
+            expense={summaryTotals.expense}
+            balance={summaryTotals.balance}
+          />
+        </aside>
+
+        {/* 中央：入力 と 一覧 */}
+        <main className="mainPane">
           <EntryForm
             draft={draft}
             setDraft={setDraft}
@@ -113,17 +124,6 @@ export const Home = () => {
             incomeCategories={INCOME_CATEGORIES}
           />
 
-          <MonthlySummaryCard
-            titleMonthKey={summaryMonthKey}
-            monthly={monthly}
-            income={summaryTotals.income}
-            expense={summaryTotals.expense}
-            balance={summaryTotals.balance}
-          />
-        </aside>
-
-        {/* 中央：一覧 */}
-        <main className="mainPane">
           <AccountsPanel
             modeLabel={modeLabel}
             periodLabel={periodLabel}
@@ -151,6 +151,7 @@ export const Home = () => {
           />
         </aside>
       </div>
+
     </div>
   )
 }

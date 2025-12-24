@@ -4,14 +4,17 @@
   --text: #111827;
   --muted: #6b7280;
   --border: #e5e7eb;
+
   --green: #16a34a;
   --red: #dc2626;
   --blue: #2563eb;
+
   --radius: 14px;
 
-  /* ✅ フォント統一用 */
+  /* font */
   --fs-title: 28px;
   --fs-h2: 16px;
+  --fs-h3: 14px;
   --fs-base: 14px;
   --fs-sub: 13px;
 }
@@ -27,67 +30,56 @@ body {
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   background: var(--bg);
   color: var(--text);
   font-size: var(--fs-base);
 }
 
-/* ✅ 画面全体幅を少し広げる（中央が狭くならないように） */
-.container {
+/* =========================
+   Home layout (left / center / right)
+   ========================= */
+.homeLayout {
   max-width: 1500px;
-  margin: 24px auto;
-  padding: 0 16px;
+  margin: 0 auto;
+  padding: 18px 16px 40px;
 }
 
-/* ✅ タイトル */
-.title {
+.homeHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 0 18px;
+}
+
+.appTitle {
+  margin: 0;
   font-size: var(--fs-title);
-  font-weight: 800;
-  margin: 0 0 16px;
-}
-.titleCenter {
-  text-align: center;
+  font-weight: 900;
+  letter-spacing: 0.02em;
 }
 
-/* ✅ グリッド（中央を広めに確保） */
-.layout {
+.homeGrid {
   display: grid;
-  grid-template-columns: 300px minmax(640px, 1fr) 340px;
-  gap: 20px;
+  grid-template-columns: 280px minmax(640px, 1fr) 320px;
+  gap: 18px;
   align-items: start;
 }
 
-/* ✅ 左サイドバー */
-.sidebar {
+/* each column */
+.leftPane,
+.mainPane,
+.rightPane {
+  min-width: 0; /* はみ出し防止 */
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* ✅ 中央カラム */
-.main {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0; /* ← これが無いと中身がはみ出しやすい */
-}
-
-/* 互換：以前の left を main として扱う（念のため） */
-.left {
-  min-width: 0;
-}
-
-/* ✅ 右カラム */
-.right {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-
-.card {
+/* =========================
+   Panel (card)
+   ========================= */
+.panel {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -95,52 +87,63 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
-/* ✅ フォント揃える：各カードの見出し */
-.card h2 {
-  margin: 0 0 10px;
+.panelTitle {
+  margin: 0 0 12px;
   font-size: var(--fs-h2);
-  font-weight: 800;
+  font-weight: 900;
 }
 
-.subText {
+.subTitle {
+  margin: 10px 0 10px;
+  font-size: var(--fs-h3);
+  font-weight: 900;
   color: var(--muted);
-  font-size: var(--fs-sub);
-  margin-top: 10px;
 }
 
-.cardHeader {
-  display: flex;
+/* =========================
+   EntryForm
+   ========================= */
+.editingBadge {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.editBadge {
+  gap: 8px;
   font-size: 12px;
-  padding: 4px 10px;
+  font-weight: 800;
+  padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f9fafb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: rgba(37, 99, 235, 0.06);
+  color: var(--blue);
+  margin-bottom: 10px;
 }
 
-/* form */
-.formRow {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: flex-end;
+/* 4列で「日付 / 種別 / カテゴリ / 金額」 */
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
+
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-.field label {
-  font-size: 12px;
-  color: var(--muted);
+  min-width: 0;
 }
 
-.input {
+.fieldFull {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.panel input,
+.panel select {
+  width: 100%;
   height: 34px;
   padding: 0 10px;
   border: 1px solid var(--border);
@@ -149,14 +152,22 @@ body {
   outline: none;
   font-size: var(--fs-base);
 }
-.inputShort {
-  width: 120px;
-}
-.inputMemo {
-  width: 220px;
+
+.panel input:focus,
+.panel select:focus {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
-.button {
+.formActions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.panel button {
   height: 34px;
   padding: 0 14px;
   border: none;
@@ -164,153 +175,83 @@ body {
   background: var(--blue);
   color: #fff;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 900;
   font-size: var(--fs-base);
 }
-.button:hover {
-  filter: brightness(0.95);
+
+.panel button:hover {
+  filter: brightness(0.96);
 }
-.buttonGhost {
+
+/* 2つめのボタン（編集解除）などを薄めに */
+.formActions button + button {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
 }
 
-/* header controls */
-.listHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-.listHeaderLeft h2 {
-  margin: 0 0 8px;
-  font-size: var(--fs-h2);
-}
-
-.controls {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.controlSelect {
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #fff;
-  font-size: var(--fs-base);
-}
-
-.summaryRow {
+/* =========================
+   AccountsPanel
+   ========================= */
+.controlsRow {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  font-size: var(--fs-sub);
-  align-items: center;
+  align-items: flex-end;
+  margin-bottom: 10px;
 }
 
-.summaryItem {
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.controlLabel {
+  font-size: 12px;
   color: var(--muted);
-}
-.summaryItem b {
-  color: var(--text);
+  font-weight: 700;
 }
 
-.summaryItem.income b {
-  color: var(--green);
-}
-.summaryItem.expense b {
-  color: var(--red);
-}
-.summaryItem.balance.plus b {
-  color: var(--green);
-}
-.summaryItem.balance.minus b {
-  color: var(--red);
-}
-.summaryItem.target b {
-  color: var(--blue);
-}
-.summaryItem.diff.plus b {
-  color: var(--green);
-}
-.summaryItem.diff.minus b {
-  color: var(--red);
+.emptyState {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  background: #fafafa;
 }
 
-/* list */
-.list {
-  margin: 12px 0 0;
+.accountsList {
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.row {
+.accountRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 0;
   border-top: 1px solid var(--border);
 }
 
-/* ✅ ここがポイント：
-   - Actions列を minmax にして “必要なら縮む”
-   - それでも足りなければ横スクロールできるようにする
-*/
-.rowGrid {
-  display: grid;
-  grid-template-columns:
-    72px
-    110px
-    120px
-    minmax(140px, 1fr)
-    120px
-    minmax(120px, 160px);
+.rowMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rowTop {
+  display: flex;
   align-items: center;
   gap: 10px;
-
-  /* どうしても詰まる時の保険 */
-  min-width: 720px;
 }
 
-/* ✅ 一覧カード内で切れないように横スクロール許可 */
-.accountsListWrap {
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
-.colType {
-  justify-self: start;
-}
-.colDate {
-  justify-self: start;
+.typeBadge {
   font-size: 12px;
-  color: #6b7280;
-}
-.colCategory {
-  justify-self: start;
-}
-.colMemo {
-  justify-self: start;
-  font-size: 12px;
-  color: #6b7280;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.colAmount {
-  justify-self: end;
-  font-weight: 800;
-}
-.colActions {
-  justify-self: end;
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;
-}
-
-.badge {
-  font-size: 12px;
+  font-weight: 900;
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -318,148 +259,156 @@ body {
   white-space: nowrap;
 }
 
-.badgeExpense {
+.typeBadge.isExpense {
   color: var(--red);
   border-color: rgba(220, 38, 38, 0.3);
   background: rgba(220, 38, 38, 0.06);
 }
 
-.badgeIncome {
+.typeBadge.isIncome {
   color: var(--green);
   border-color: rgba(22, 163, 74, 0.3);
   background: rgba(22, 163, 74, 0.06);
 }
 
-.amount {
-  font-weight: 800;
+.dateText {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
-.miniBtn {
+.rowMid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.categoryText {
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.memoText {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.amountText {
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.actions button {
   height: 30px;
   padding: 0 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: #fff;
+  color: var(--text);
   cursor: pointer;
-  font-weight: 700;
-  font-size: var(--fs-base);
-  white-space: nowrap;
+  font-weight: 900;
 }
 
-.miniBtnDanger {
+.actions button:hover {
+  background: #f9fafb;
+}
+
+.actions button:last-child {
   border-color: rgba(220, 38, 38, 0.35);
   color: var(--red);
 }
 
-/* Pie */
-.pieWrap {
-  width: 100%;
-}
-
-/* Pie header / legend */
-.pieHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* =========================
+   MonthlySummary
+   ========================= */
+.summaryBlock {
   margin-bottom: 10px;
 }
 
-.pieHeaderTitle {
+.summaryTitle {
   font-size: var(--fs-sub);
   color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 800;
 }
 
-.pieHeaderValue {
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.chip {
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #fff;
-  cursor: pointer;
-  align-self: flex-start;
-  font-weight: 700;
-  font-size: var(--fs-base);
-}
-
-.pieLegend {
+.summaryRow {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.legendRowButton {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: #fff;
-  cursor: pointer;
-  font-size: var(--fs-base);
+  padding: 6px 0;
+  font-size: var(--fs-sub);
 }
 
-.legendRowButton.active {
-  border-color: rgba(37, 99, 235, 0.35);
-  background: rgba(37, 99, 235, 0.04);
-}
-
-.legendLeft {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.legendColor {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  flex: 0 0 auto;
-}
-
-.legendName {
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
-}
-
-.legendValue {
+.summaryLabel {
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 800;
+}
+
+.summaryValue {
+  font-weight: 900;
 }
 
 .summaryGreen {
   color: var(--green);
 }
+
 .summaryRed {
   color: var(--red);
 }
-.summaryBlue {
-  color: var(--blue);
+
+.chartWrap {
+  margin-top: 10px;
 }
 
-/* ✅ 小さめ画面対応 */
+/* =========================
+   Pie
+   ========================= */
+.pieBlock + .pieBlock {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* =========================
+   Responsive
+   ========================= */
 @media (max-width: 1100px) {
-  .layout {
+  .homeGrid {
     grid-template-columns: 1fr;
   }
-  .right {
-    order: 3;
+
+  .leftPane {
+    order: 1;
   }
-  .main {
+  .mainPane {
     order: 2;
   }
-  .sidebar {
-    order: 1;
+  .rightPane {
+    order: 3;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .control {
+    min-width: 140px;
   }
 }
