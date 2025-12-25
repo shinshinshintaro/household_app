@@ -48,20 +48,37 @@ const yen = (n: number) => `¥${n.toLocaleString()}`
 export const hoverLift = {
   transition: 'transform 160ms ease, box-shadow 160ms ease',
   '&:hover': { transform: 'translateY(-2px)', boxShadow: 6 },
-} as const
+}
 
 const headCellSx = {
   fontWeight: 900,
   textAlign: 'center',
   whiteSpace: 'nowrap',
-} as const
+}
 
 const bodyCellCenterSx = {
   textAlign: 'center',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-} as const
+}
+
+// 「被り」の本丸：メモは“必ず省略”して値段領域を守る
+const memoCellSx = {
+  textAlign: 'center',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  color: 'text.secondary',
+}
+
+// 値段も長くなる可能性があるので、省略して行を守る（折り返しはさせない）
+const amountCellSx = {
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  fontWeight: 900,
+}
 
 export const AccountsPanel = ({
   modeLabel,
@@ -147,34 +164,34 @@ export const AccountsPanel = ({
             variant="outlined"
             sx={{
               borderRadius: 2,
-              overflow: 'hidden', // “枠からはみ出し”を絶対に出さない
+              overflow: 'hidden',
             }}
           >
             <Table
               size="small"
               sx={{
                 width: '100%',
-                tableLayout: 'fixed', // ★ここが本命：列崩れ防止
+                tableLayout: 'fixed', // ★列崩れ防止
               }}
             >
-              {/* 最小限の幅だけ指定（固定しすぎない） */}
+              {/* 「固定しすぎない」けど、操作と値段の最低幅は守る */}
               <colgroup>
                 <col style={{ width: 92 }} />   {/* 種別 */}
                 <col style={{ width: 120 }} />  {/* 日付 */}
                 <col style={{ width: 140 }} />  {/* カテゴリ */}
-                <col />                         {/* メモ（伸びる） */}
-                <col style={{ width: 140 }} />  {/* 値段（12桁でも被らない） */}
-                <col style={{ width: 160 }} />  {/* 操作 */}
+                <col />                         {/* メモ（ここが伸縮） */}
+                <col style={{ width: 160 }} />  {/* 値段 */}
+                <col style={{ width: 170 }} />  {/* 操作 */}
               </colgroup>
 
               <TableHead>
                 <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.03)' }}>
-                  <TableCell sx={headCellSx}>種別</TableCell>
-                  <TableCell sx={headCellSx}>日付</TableCell>
-                  <TableCell sx={headCellSx}>カテゴリ</TableCell>
-                  <TableCell sx={headCellSx}>メモ</TableCell>
-                  <TableCell sx={{ ...headCellSx, textAlign: 'right' }}>値段</TableCell>
-                  <TableCell sx={headCellSx}>操作</TableCell>
+                  <TableCell sx={{ ...headCellSx, textAlign: 'center' }}>種別</TableCell>
+                  <TableCell sx={{ ...headCellSx, textAlign: 'center' }}>日付</TableCell>
+                  <TableCell sx={{ ...headCellSx, textAlign: 'center' }}>カテゴリ</TableCell>
+                  <TableCell sx={{ ...headCellSx, textAlign: 'center' }}>メモ</TableCell>
+                  <TableCell sx={{ ...headCellSx, textAlign: 'center' }}>値段</TableCell>
+                  <TableCell sx={{ ...headCellSx, textAlign: 'center' }}>操作</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -192,7 +209,7 @@ export const AccountsPanel = ({
                         '& td': { verticalAlign: 'middle' },
                       }}
                     >
-                      <TableCell sx={{ ...bodyCellCenterSx }}>
+                      <TableCell sx={bodyCellCenterSx}>
                         <Chip
                           size="small"
                           label={isExpense ? '支出' : '収入'}
@@ -208,31 +225,15 @@ export const AccountsPanel = ({
                         {a.category}
                       </TableCell>
 
-                      <TableCell
-                        sx={{
-                          textAlign: 'center',
-                          whiteSpace: 'nowrap',
-                          color: 'text.secondary',
-                        }}
-                        title={memo}
-                      >
+                      <TableCell sx={memoCellSx} title={memo}>
                         {memo}
                       </TableCell>
 
-                      <TableCell
-                        align="right"
-                        sx={{
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          fontWeight: 900,
-                        }}
-                        title={amountText}
-                      >
+                      <TableCell align="right" sx={amountCellSx} title={amountText}>
                         {amountText}
                       </TableCell>
 
-                      <TableCell sx={{ ...bodyCellCenterSx }}>
+                      <TableCell sx={bodyCellCenterSx}>
                         <Stack direction="row" spacing={1} justifyContent="center">
                           <Button size="small" variant="outlined" onClick={() => onEdit(a)}>
                             編集

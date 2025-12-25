@@ -14,12 +14,12 @@ const parseAccounts = (raw: string | null): Account[] => {
 }
 
 // 金額バリデーション（整数のみ & 上限）
-const MAX_YEN = 999_999_999_999 // 12桁
+const MAX_YEN = 999_999_999 // 9桁
 
 const parseAmount = (amount: string): number | null => {
   const raw = amount.trim().replace(/,/g, '')
   if (!/^\d+$/.test(raw)) return null
-  if (raw.length > 12) return null
+  if (raw.length > 9) return null
 
   const n = BigInt(raw)
   if (n <= 0n) return null
@@ -58,7 +58,7 @@ export const useAccounts = (storageKey: string) => {
 
     const amountNum = parseAmount(draft.amount)
     if (amountNum === null) {
-      alert('金額は「1円以上の整数」で、最大12桁まで入力できます（小数は不可）')
+      alert('金額は「1円以上の整数」で、最大9桁まで入力できます（小数は不可）')
       return
     }
 
@@ -80,7 +80,7 @@ export const useAccounts = (storageKey: string) => {
 
     const amountNum = parseAmount(draft.amount)
     if (amountNum === null) {
-      alert('金額は「1円以上の整数」で、最大12桁まで入力できます（小数は不可）')
+      alert('金額は「1円以上の整数」で、最大9桁まで入力できます（小数は不可）')
       return
     }
 

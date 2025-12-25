@@ -108,7 +108,7 @@ export function EntryForm({
             </FormControl>
 
             <TextField
-              label="金額"
+              label="金額（9桁まで）"
               placeholder="例: 1200"
               inputMode="numeric"
               value={draft.amount}
