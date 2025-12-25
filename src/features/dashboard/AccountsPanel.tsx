@@ -212,8 +212,6 @@ export const AccountsPanel = ({
                         sx={{
                           textAlign: 'center',
                           whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
                           color: 'text.secondary',
                         }}
                         title={memo}
