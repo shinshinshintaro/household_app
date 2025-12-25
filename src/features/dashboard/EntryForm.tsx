@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
 import {
-  Box,
   Button,
   Card,
   CardContent,
@@ -125,7 +124,11 @@ export function EntryForm({
             onChange={e =>
               setDraft(prev => ({ ...prev, memo: e.target.value }))
             }
-            inputProps={{ maxLength: MEMO_MAX }}
+            slotProps={{
+              htmlInput: {
+                maxLength: MEMO_MAX,
+              },
+            }}
             fullWidth
           />
 
