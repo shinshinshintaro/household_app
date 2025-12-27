@@ -119,7 +119,7 @@ export function EntryForm({
           </Stack>
 
           <TextField
-            label={`備考（${MEMO_MAX}文字以内）`}
+            label={`メモ（${MEMO_MAX}文字以内）`}
             value={draft.memo}
             onChange={e =>
               setDraft(prev => ({ ...prev, memo: e.target.value }))

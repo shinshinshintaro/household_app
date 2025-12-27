@@ -20,7 +20,7 @@ export const hoverLift = {
 
 export function PiePanel({ periodLabel, expensePieData, expenseTotal, incomePieData, incomeTotal }: Props) {
   return (
-    <Card variant="outlined" sx={hoverLift}>
+    <Card sx={{ width: '100%', ...hoverLift }}>
       <CardHeader title={`円グラフ（${periodLabel}）`} />
 
       <CardContent>

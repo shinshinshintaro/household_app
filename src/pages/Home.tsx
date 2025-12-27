@@ -122,7 +122,7 @@ export const Home = () => {
   const modeLabel = viewMode === 'BALANCE' ? '収支' : viewMode === 'INCOME' ? '収入' : '支出'
 
   return (
-    <Container maxWidth={false} sx={{ py: 3, maxWidth: 1500, mx: 'auto' }}>
+    <Container maxWidth={false} sx={{width: '100%',px: { xs: 2, sm: 3 },py: 3,}}>
       <Stack spacing={2}>
         <Typography variant="h5" fontWeight={700} textAlign="center">
           <FadeIn delay={500}>家計簿アプリ</FadeIn>

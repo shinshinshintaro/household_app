@@ -28,12 +28,12 @@ const parseAmount = (amount: string): number | null => {
   return Number(n)
 }
 
-// 備考バリデーション（共通）
+// メモバリデーション（共通）
 const MEMO_MAX = 10
 
 const validateMemo = (memo: string) => {
   if (memo.length > MEMO_MAX) {
-    alert(`備考は${MEMO_MAX}文字以内で入力してください`)
+    alert(`メモは${MEMO_MAX}文字以内で入力してください`)
     return false
   }
   return true
