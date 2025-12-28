@@ -21,7 +21,11 @@ export const hoverLift = {
 export function PiePanel({ periodLabel, expensePieData, expenseTotal, incomePieData, incomeTotal }: Props) {
   return (
     <Card sx={{ width: '100%', ...hoverLift }}>
-      <CardHeader title={`円グラフ（${periodLabel}）`} />
+      <CardHeader title={
+          <Typography variant="h6" fontWeight={800}>
+            円グラフ（{periodLabel}）
+          </Typography>
+        } />
 
       <CardContent>
         <Stack spacing={2}>

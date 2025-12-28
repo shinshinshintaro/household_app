@@ -103,7 +103,6 @@ export const AccountsPanel = ({
           </Typography>
         }
       />
-
       <CardContent sx={{ pt: 0 }}>
         {/* フィルタ */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>

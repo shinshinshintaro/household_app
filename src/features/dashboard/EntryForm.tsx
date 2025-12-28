@@ -11,6 +11,7 @@ import {
   Select,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
 import type { Draft } from '../../types/Draft'
 
@@ -50,7 +51,11 @@ export function EntryForm({
   return (
     <Card variant="outlined" sx={hoverLift}>
       <CardHeader
-        title="入力"
+        title={
+          <Typography variant="h6" fontWeight={800}>
+            入力フォーム
+          </Typography>
+        }
         action={editing ? <Chip color="warning" label="編集モード" /> : null}
       />
 
@@ -119,6 +124,8 @@ export function EntryForm({
           </Stack>
 
           <TextField
+            error={draft.memo.length > 10}
+            helperText={draft.memo.length > 10 ? `メモは${MEMO_MAX}文字以内で入力してください` : ''}
             label={`メモ（${MEMO_MAX}文字以内）`}
             value={draft.memo}
             onChange={e =>

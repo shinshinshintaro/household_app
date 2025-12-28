@@ -59,7 +59,12 @@ export const MonthlySummaryCard = ({
 
   return (
     <Card sx={{ width: '100%', ...hoverLift }}>
-      <CardHeader title="月次サマリ" />
+      <CardHeader
+        title={
+          <Typography variant="h6" fontWeight={800}>
+            月次サマリ
+          </Typography>
+        } />
       <CardContent>
         <Typography variant="body2" sx={{ mb: 1 }}>
           {formatMonthJP(titleMonthKey)}の収支

@@ -12,6 +12,7 @@ import { FadeIn } from '../components/FadeIn'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = 'household-app-data'
+const MEMO_MAX = 10
 
 type SnackState = {
   open: boolean
@@ -30,52 +31,117 @@ export const Home = () => {
     memo: '',
   })
 
-  const { viewMode, setViewMode, monthKey, setMonthKey, sortKey, setSortKey } = useFilters(draft.date)
+  const { viewMode, setViewMode, monthKey, setMonthKey, sortKey, setSortKey } =
+    useFilters(draft.date)
+
   const [editingId, setEditingId] = useState<number | null>(null)
 
-  // ✅ Snackbar
+  // Snackbar
   const [snack, setSnack] = useState<SnackState>({
     open: false,
     message: '',
     severity: 'success',
   })
 
-  const showSnack = (message: string, severity: SnackState['severity'] = 'success') => {
+  const showSnack = (
+    message: string,
+    severity: SnackState['severity'] = 'success',
+  ) => {
     setSnack({ open: true, message, severity })
   }
-  const closeSnack = () => setSnack(prev => ({ ...prev, open: false }))
+
+  const closeSnack = () =>
+    setSnack(prev => ({ ...prev, open: false }))
 
   // 種別に応じたカテゴリ候補
-  const categories = draft.type === 'EXPENSE' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
+  const categories =
+    draft.type === 'EXPENSE' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
 
   // 月プルダウン候補
-  const monthOptions = useMemo(() => S.selectMonthOptions(accounts, draft.date), [accounts, draft.date])
+  const monthOptions = useMemo(
+    () => S.selectMonthOptions(accounts, draft.date),
+    [accounts, draft.date],
+  )
 
-  // 一覧用（期間→モード→ソート）
-  const accountsByPeriod = useMemo(() => S.selectAccountsByPeriod(accounts, monthKey), [accounts, monthKey])
-  const accountsByMode = useMemo(() => S.selectAccountsByMode(accountsByPeriod, viewMode), [accountsByPeriod, viewMode])
-  const visibleAccounts = useMemo(() => S.selectVisibleAccounts(accountsByMode, sortKey), [accountsByMode, sortKey])
+  // 一覧用（期間 → モード → ソート）
+  const accountsByPeriod = useMemo(
+    () => S.selectAccountsByPeriod(accounts, monthKey),
+    [accounts, monthKey],
+  )
+  const accountsByMode = useMemo(
+    () => S.selectAccountsByMode(accountsByPeriod, viewMode),
+    [accountsByPeriod, viewMode],
+  )
+  const visibleAccounts = useMemo(
+    () => S.selectVisibleAccounts(accountsByMode, sortKey),
+    [accountsByMode, sortKey],
+  )
 
   // 円グラフ用
-  const expensePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'EXPENSE'), [accountsByPeriod])
-  const expenseTotal = useMemo(() => S.selectTotalFromPie(expensePieData), [expensePieData])
-  const incomePieData = useMemo(() => S.selectPieData(accountsByPeriod, 'INCOME'), [accountsByPeriod])
-  const incomeTotal = useMemo(() => S.selectTotalFromPie(incomePieData), [incomePieData])
+  const expensePieData = useMemo(
+    () => S.selectPieData(accountsByPeriod, 'EXPENSE'),
+    [accountsByPeriod],
+  )
+  const expenseTotal = useMemo(
+    () => S.selectTotalFromPie(expensePieData),
+    [expensePieData],
+  )
+  const incomePieData = useMemo(
+    () => S.selectPieData(accountsByPeriod, 'INCOME'),
+    [accountsByPeriod],
+  )
+  const incomeTotal = useMemo(
+    () => S.selectTotalFromPie(incomePieData),
+    [incomePieData],
+  )
 
-  // 月次サマリ用：ALLのときは最新月で表示
-  const latestMonthKey = useMemo(() => S.selectLatestMonthKey(accounts, draft.date), [accounts, draft.date])
+  // 月次サマリ用（ALLのときは最新月）
+  const latestMonthKey = useMemo(
+    () => S.selectLatestMonthKey(accounts, draft.date),
+    [accounts, draft.date],
+  )
   const summaryMonthKey = monthKey === 'ALL' ? latestMonthKey : monthKey
 
   const accountsForSummaryMonth = useMemo(
     () => S.selectAccountsByPeriod(accounts, summaryMonthKey),
     [accounts, summaryMonthKey],
   )
-  const summaryTotals = useMemo(() => S.selectTotals(accountsForSummaryMonth), [accountsForSummaryMonth])
-  const monthly = useMemo(() => S.selectMonthlyBalances(accounts), [accounts])
+  const summaryTotals = useMemo(
+    () => S.selectTotals(accountsForSummaryMonth),
+    [accountsForSummaryMonth],
+  )
+  const monthly = useMemo(
+    () => S.selectMonthlyBalances(accounts),
+    [accounts],
+  )
 
-  const onResetDraft = () => setDraft(prev => ({ ...prev, amount: '', memo: '' }))
+  const onResetDraft = () =>
+    setDraft(prev => ({ ...prev, amount: '', memo: '' }))
+
+  // -----------------------------
+  // ✅ 追加：バリデーション
+  // -----------------------------
+  const validateDraft = (d: Draft): string | null => {
+    const amountNum = Number(d.amount)
+
+    if (!d.amount.trim()) return '金額を入力してください'
+    if (!Number.isFinite(amountNum)) return '金額は数値で入力してください'
+    if (amountNum <= 0) return '金額は1以上にしてください'
+    if ((d.memo ?? '').length > MEMO_MAX)
+      return `メモは${MEMO_MAX}文字以内にしてください`
+    if (!d.date) return '日付を入力してください'
+    if (!d.category) return 'カテゴリを選択してください'
+
+    return null
+  }
 
   const onAddOrUpdate = () => {
+    const error = validateDraft(draft)
+    if (error) {
+      showSnack(error, 'error') // ❌ successを出さない
+      return
+    }
+
     if (editingId === null) {
       addAccount(draft)
       showSnack('追加しました', 'success')
@@ -109,26 +175,34 @@ export const Home = () => {
 
   const onDelete = (a: Account) => {
     deleteAccount(a)
-    // 編集中の行を消した場合の安全処理
+
     const id = S.getSafeId(a)
     if (id !== null && editingId === id) {
       setEditingId(null)
       onResetDraft()
     }
+
     showSnack('削除しました', 'warning')
   }
 
   const periodLabel = monthKey === 'ALL' ? '全期間' : S.formatMonthJP(monthKey)
-  const modeLabel = viewMode === 'BALANCE' ? '収支' : viewMode === 'INCOME' ? '収入' : '支出'
+  const modeLabel =
+    viewMode === 'BALANCE'
+      ? '収支'
+      : viewMode === 'INCOME'
+      ? '収入'
+      : '支出'
 
   return (
-    <Container maxWidth={false} sx={{width: '100%',px: { xs: 2, sm: 3 },py: 3,}}>
+    <Container
+      maxWidth={false}
+      sx={{ width: '100%', px: { xs: 2, sm: 3 }, py: 3 }}
+    >
       <Stack spacing={2}>
         <Typography variant="h5" fontWeight={700} textAlign="center">
           <FadeIn delay={500}>家計簿アプリ</FadeIn>
         </Typography>
 
-        {/* CSSの3カラムグリッドをそのまま使う */}
         <Box className="homeGrid">
           <aside className="leftPane">
             <FadeIn delay={1500}>
@@ -192,14 +266,18 @@ export const Home = () => {
         </Box>
       </Stack>
 
-      {/* ✅ Snackbar（③） */}
       <Snackbar
         open={snack.open}
         autoHideDuration={2200}
         onClose={closeSnack}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={closeSnack} severity={snack.severity} variant="filled" sx={{ width: '100%' }}>
+        <Alert
+          onClose={closeSnack}
+          severity={snack.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
           {snack.message}
         </Alert>
       </Snackbar>
